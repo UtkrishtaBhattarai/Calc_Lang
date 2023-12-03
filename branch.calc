@@ -1,0 +1,4 @@
+input x
+if x = 5 
+  display x
+end if

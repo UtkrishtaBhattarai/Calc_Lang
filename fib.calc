@@ -1,0 +1,16 @@
+# compute Fibonacci Numbers in the worst possible way
+fun fib(n) 
+   result = 1
+   if n > 2
+     result = fib(n-1)+fib(n-2)
+   end if
+
+   result
+end fun
+
+input count
+n = 1
+while n <= count
+  display fib(n)
+  n = n + 1
+end while

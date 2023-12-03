@@ -1,0 +1,16 @@
+fun move(n, src, dest, spare)
+   if n = 1
+      display src
+      display dest
+   end if
+
+   if n <> 1
+      move(n-1, src, spare, dest)
+      move(1, src, dest, spare)
+      move(n-1, spare, dest, src)
+   end if
+end fun
+
+input ndisks
+move(ndisks, 1, 3, 2)
+   

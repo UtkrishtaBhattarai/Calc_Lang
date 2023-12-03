@@ -1,0 +1,9 @@
+input min
+input max
+input inc
+
+num = min
+while num <= max
+  display num
+  num = num + inc
+end while

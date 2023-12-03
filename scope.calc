@@ -1,0 +1,23 @@
+x = 1   # ref 1
+y = 2
+
+fun f() # ref 2
+  x = 3
+  z = 6
+  q = 7
+
+  fun g()  # ref 3
+     z = 12
+     h = 21
+     y = 1
+  end fun
+
+  g()
+end fun
+
+fun shadow(x) # Ref 4
+   display x
+end fun
+
+f()
+shadow(12)

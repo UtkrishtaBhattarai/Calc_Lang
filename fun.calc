@@ -1,0 +1,10 @@
+fun test()
+  x = 5
+  test2()
+end fun
+
+fun test2()
+  display x
+end fun
+
+test()

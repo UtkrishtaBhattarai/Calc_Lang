@@ -1,0 +1,9 @@
+# File: pythagoras.calc
+# Purpose: Computes the hypotenuse of a triangle.
+
+# get the legs
+input a
+input b
+
+# compute and display the hypotenuse
+display (a^2+b^2)^0.5
