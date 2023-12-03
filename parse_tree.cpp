@@ -82,11 +82,11 @@ std::string EvalResult::as_string()
 {
   if(_type == STRING)
   {
-    return std::string(_str);
+    return _str;
   }
   else
   {
-    return _str;
+    return std::string(_str);
   }
   
 }
@@ -474,27 +474,49 @@ void Display::print(int indent) const {
 }
 
 EvalResult Input::eval(Ref_Env *env) {
-  EvalResult result;
-  Variable *v = (Variable*) child();
-  double num;
+    EvalResult result;
+    Variable *v = (Variable*) child();
+    
+    std::string input;
 
-  // print the prompt and get the number
-  std::cout << v->name() << "=";
-  std::cin >> num;
+    // print the prompt and get the input
+    std::cout << v->name() << "=";
+    std::cin >> input;
 
-  // build the value to the smallest type 
-  EvalResult value;
-  if(num - (int) num == 0.0) {
-    value.set((int) num);
-  } else {
-    value.set(num);
-  }
+    // Check if the input starts and ends with double quotes, treat as string
+    if (input.size() >= 2 && input.front() == '"' && input.back() == '"') {
+        input = input.substr(1, input.size() - 2);  // Remove the double quotes
+        EvalResult value;
+        value.set(input);
+        v->set(env, value);
+    } else {
+        // Check if the input is numeric
+        try {
+            size_t pos;
+            double num = std::stod(input, &pos);
 
-  // bind the variable
-  v->set(env, value);
+            // Check if the entire string was converted to a number
+            if (pos == input.size()) {
+                EvalResult value;
+                if (num - static_cast<int>(num) == 0.0) {
+                    value.set(static_cast<int>(num));
+                } else {
+                    value.set(num);
+                }
+                v->set(env, value);
+            } else {
+                std::cerr << "Invalid numeric input: " << input << std::endl;
+            }
+        } catch (const std::invalid_argument& e) {
+            std::cerr << "Invalid input: " << input << std::endl;
+        } catch (const std::out_of_range& e) {
+            std::cerr << "Numeric input out of range: " << input << std::endl;
+        }
+    }
 
-  return result;
+    return result;
 }
+
 
 void Input::print(int indent) const {
   // print myself
