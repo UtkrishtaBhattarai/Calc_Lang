@@ -82,11 +82,11 @@ std::string EvalResult::as_string()
 {
   if(_type == STRING)
   {
-    return _str;
+    return std::string(_str);
   }
   else
   {
-    return std::string(_str);
+    return _str;
   }
   
 }
@@ -473,15 +473,18 @@ void Display::print(int indent) const {
   child()->print(indent + 1);
 }
 
+
+
 EvalResult Input::eval(Ref_Env *env) {
     EvalResult result;
-    Variable *v = (Variable*) child();
-    
+    Variable *v = static_cast<Variable*>(child());
     std::string input;
 
     // print the prompt and get the input
     std::cout << v->name() << "=";
-    std::cin >> input;
+
+    // Read the entire line, including spaces
+    std::getline(std::cin, input);
 
     // Check if the input starts and ends with double quotes, treat as string
     if (input.size() >= 2 && input.front() == '"' && input.back() == '"') {
@@ -495,22 +498,22 @@ EvalResult Input::eval(Ref_Env *env) {
             size_t pos;
             double num = std::stod(input, &pos);
 
-            // Check if the entire string was converted to a number
             if (pos == input.size()) {
                 EvalResult value;
-                if (num - static_cast<int>(num) == 0.0) {
+
+                // Check if the numeric value is an integer or has a fractional part
+                if (std::floor(num) == num) {
                     value.set(static_cast<int>(num));
                 } else {
                     value.set(num);
                 }
+
                 v->set(env, value);
             } else {
                 std::cerr << "Invalid numeric input: " << input << std::endl;
             }
         } catch (const std::invalid_argument& e) {
             std::cerr << "Invalid input: " << input << std::endl;
-        } catch (const std::out_of_range& e) {
-            std::cerr << "Numeric input out of range: " << input << std::endl;
         }
     }
 
