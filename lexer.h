@@ -40,6 +40,9 @@ enum Token {
   COMMA,
   CLASS,
   STRLIT,
+  ARRAY,
+  LBRACKET,
+  RBRACKET,
 
 };
 
