@@ -324,18 +324,6 @@ private:
 };
 
 
-class Class_Def: public BinaryOp {
-public:
-  Class_Def (const Lexer_Token &tok);
-  virtual EvalResult eval(Ref_Env *env);
-  virtual void print(int indent) const;
-  virtual std::string name() const;
-
-private:
-  Variable var;
-};
-
-
 class Fun_Call : public BinaryOp {
 public:
   virtual EvalResult eval(Ref_Env *env);

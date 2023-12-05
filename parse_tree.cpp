@@ -919,36 +919,3 @@ void Fun_Call::print(int indent) const
 
 
 
-
-Class_Def::Class_Def (const Lexer_Token &tok) : var(tok)
-{
-}
-
-
-EvalResult Class_Def::eval(Ref_Env *env)
-{
-  EvalResult value;
-  env->set(name(), value);
-  return EvalResult();
-}
-
-
-std::string Class_Def::name() const 
-{
-  return var.name();
-}
-
-
-void Class_Def::print(int indent) const
-{
-  // print ourself
-  std::cout << std::setw(indent) << "";
-  std::cout << "fun " << name() << std::endl;
-  std::cout << std::setw(indent) << "";
-  std::cout << "Parameters";
-  left()->print(indent+1);
-  std::cout << std::setw(indent) << "";
-  std::cout << "Body";
-  right()->print(indent+1);
-}
-
