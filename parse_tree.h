@@ -24,7 +24,7 @@ public:
 //////////////////////////////////////////
 // Evaluation Results
 //////////////////////////////////////////
-enum EvalType {VOID, INTEGER, REAL, UNDEFINED, BOOLEAN, FUNCTION};
+enum EvalType {VOID, INTEGER, REAL, UNDEFINED, BOOLEAN, FUNCTION, STRING};
 class EvalResult
 {
 public:
@@ -38,12 +38,17 @@ public:
   virtual void set(double _d);
   virtual void set(bool _b);
   virtual void set(Closure *_fun);
+  virtual void set(std::string _b);
+
 
   // type coercion functions
   virtual int as_integer();
   virtual double as_real();
   virtual bool as_bool();
   virtual Closure* as_fun();
+  virtual std::string as_string();
+  
+
 
   // retrieve the type
   virtual EvalType type();
@@ -53,6 +58,8 @@ private:
   bool _b;         // a boolean value
   EvalType _type;  // the type
   Closure* _fun;    // a function definition 
+  std::string _str;  // a string defination
+
 };
 
 //////////////////////////////////////////

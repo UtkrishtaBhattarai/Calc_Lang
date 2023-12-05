@@ -30,6 +30,12 @@ void EvalResult::set(int _i) {
   _type = INTEGER;
 }
 
+void EvalResult::set(std::string _str)
+{
+  this-> _str = _str;
+  _type = STRING;
+}
+
 void EvalResult::set(double _d) {
   this->_d = _d;
   _type = REAL;
@@ -53,6 +59,19 @@ int EvalResult::as_integer() {
   } else {
     return (int)_d;
   }
+}
+
+std::string EvalResult::as_string()
+{
+  if(_type == STRING)
+  {
+    return _str;
+  }
+  else
+  {
+    return std::string(_str);
+  }
+  
 }
 
 double EvalResult::as_real() {
@@ -157,7 +176,13 @@ EvalResult Add::eval(Ref_Env *env) {
     // real arithmetic
     double x = l.as_real() + r.as_real();
     result.set(x);
-  } else {
+  }
+  else if(l.type() == STRING and r.type()== STRING)
+  {
+    std::string x = l.as_string() + r.as_string();
+    result.set(x);
+  }
+   else {
     // integer arithmetic
     int x = l.as_integer() + r.as_integer();
     result.set(x);
@@ -342,7 +367,12 @@ EvalResult Literal::eval(Ref_Env *env) {
 
   if (_tok.tok == INTLIT) {
     result.set(stoi(_tok.lexeme));
-  } else {
+  }
+  else if(_tok.tok == STRLIT)
+  {
+    result.set(_tok.lexeme);
+  }
+   else {
     result.set(stof(_tok.lexeme));
   }
 
@@ -403,7 +433,12 @@ EvalResult Display::eval(Ref_Env *env) {
 
   if (value.type() == INTEGER) {
     std::cout << value.as_integer() << std::endl;
-  } else if (value.type() == REAL) {
+  } 
+  else if(value.type() == STRING)
+  {
+    std::cout << value.as_string() << std::endl;
+  }
+  else if (value.type() == REAL) {
     std::cout << value.as_real() << std::endl;
   }
 

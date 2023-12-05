@@ -27,7 +27,7 @@ std::ostream &operator<<(std::ostream &os, const Lexer_Token &t) {
       "INVALID", "EOI", "NEWLINE", "PLUS",   "MINUS",  "TIMES",  "DIVIDE",
       "MOD",     "POW", "LPAREN",  "RPAREN", "INTLIT", "REALLIT", "EQUAL",
        "DISPLAY", "INPUT", "ID", "DOT", "NEW", "RECORD", "END", "FIELD",
-        "IF", "WHILE", "NE", "LT", "GT", "LTE", "GTE", "FUN", "COMMA", "CLASS"};
+        "IF", "WHILE", "NE", "LT", "GT", "LTE", "GTE", "FUN", "COMMA", "CLASS", "STRLIT"};
   return os << token_label[t.tok] << " \"" << t.lexeme << "\" Line: " << t.line
             << " Column " << t.col;
 }
@@ -60,6 +60,10 @@ Lexer_Token Lexer::next() {
 
   if (lex_single()) {
     // nothing to do
+  }
+  else if(lex_string())
+  {
+    //norbg
   } else if (lex_number()) {
     // nothing to do
   } else if(lex_fixed()) {
@@ -211,6 +215,42 @@ bool Lexer::lex_kw_or_id() {
   } else {
     _cur.tok = ID; 
   }
+
+  return true;
+}
+
+// Attempt to match a string
+bool Lexer::lex_string()
+{
+  // verify that we start with a double quote
+  if (_cur_char != '"')
+    return false;
+
+  // consume the opening double quote
+  consume();
+
+  // transition to a string literal
+  _cur.tok = STRLIT;
+
+  // consume characters until the closing double quote
+  while (_cur_char != '\0' && _cur_char != '"')
+  {
+    consume();
+  }
+
+  if (_cur_char != '"')
+  {
+    // if we didn't find the closing double quote, set token to INVALID
+    _cur.tok = INVALID;
+  }
+  else
+  {
+    // consume the closing double quote
+    consume();
+  }
+
+  // Remove double quotes from _cur.lexeme
+  _cur.lexeme = _cur.lexeme.substr(1, _cur.lexeme.size() - 2);
 
   return true;
 }

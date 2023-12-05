@@ -39,6 +39,8 @@ enum Token {
   FUN,
   COMMA,
   CLASS,
+  STRLIT,
+
 };
 
 // Tokens as emitted by the lexer
@@ -93,6 +95,10 @@ private:
 
   // attempt to match a fixed-width unconstrained token
   bool lex_fixed();
+
+  // attempt to match a string
+  bool lex_string();
+
 };
 
 #endif
