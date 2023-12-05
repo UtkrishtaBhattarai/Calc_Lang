@@ -21,3 +21,4 @@ end fun
 
 f()
 shadow(12)
+display x

@@ -9,14 +9,12 @@
 ////////////////////////////////////////
 // Lexer_Token implementation
 ////////////////////////////////////////
-Lexer_Token::Lexer_Token()
-{
+Lexer_Token::Lexer_Token() {
   // do nothing
 }
 
 Lexer_Token::Lexer_Token(Token tok, const std::string &lexeme, int line,
-                         int col)
-{
+                         int col) {
   this->tok = tok;
   this->lexeme = lexeme;
   this->line = line;
@@ -24,45 +22,12 @@ Lexer_Token::Lexer_Token(Token tok, const std::string &lexeme, int line,
 }
 
 // print out the lexer token
-std::ostream &operator<<(std::ostream &os, const Lexer_Token &t)
-{
+std::ostream &operator<<(std::ostream &os, const Lexer_Token &t) {
   static std::string token_label[] = {
-      "INVALID",
-      "EOI",
-      "NEWLINE",
-      "PLUS",
-      "MINUS",
-      "TIMES",
-      "DIVIDE",
-      "MOD",
-      "POW",
-      "LPAREN",
-      "RPAREN",
-      "INTLIT",
-      "REALLIT",
-      "EQUAL",
-      "DISPLAY",
-      "INPUT",
-      "ID",
-      "DOT",
-      "NEW",
-      "RECORD",
-      "END",
-      "FIELD",
-      "IF",
-      "WHILE",
-      "NE",
-      "LT",
-      "GT",
-      "LTE",
-      "GTE",
-      "FUN",
-      "COMMA",
-      "STRLIT",
-      "LBRAC",
-      "RBRAC",
-      "VECT_LITERAL",
-  };
+      "INVALID", "EOI", "NEWLINE", "PLUS",   "MINUS",  "TIMES",  "DIVIDE",
+      "MOD",     "POW", "LPAREN",  "RPAREN", "INTLIT", "REALLIT", "EQUAL",
+       "DISPLAY", "INPUT", "ID", "DOT", "NEW", "RECORD", "END", "FIELD",
+        "IF", "WHILE", "NE", "LT", "GT", "LTE", "GTE", "FUN", "COMMA", "CLASS"};
   return os << token_label[t.tok] << " \"" << t.lexeme << "\" Line: " << t.line
             << " Column " << t.col;
 }
@@ -70,8 +35,7 @@ std::ostream &operator<<(std::ostream &os, const Lexer_Token &t)
 ////////////////////////////////////////
 // Lexer Implementation
 ////////////////////////////////////////
-Lexer::Lexer(std::istream &_is) : _is(_is)
-{
+Lexer::Lexer(std::istream &_is) : _is(_is) {
   _cur.tok = INVALID;
   _line = 1;
   _col = 0;
@@ -81,43 +45,28 @@ Lexer::Lexer(std::istream &_is) : _is(_is)
 }
 
 // return the next token in the stream
-Lexer_Token Lexer::next()
-{
+Lexer_Token Lexer::next() {
   // skip to the next token
   skip();
 
   // handle end of file
-  if (not _is)
-  {
+  if(not _is) {
     _cur = Lexer_Token(EOI, "", _line, _col);
     return _cur;
   }
-
+  
   // initialize the next token
   _cur = Lexer_Token(INVALID, "", _line, _col);
 
-  if (lex_single())
-  {
+  if (lex_single()) {
     // nothing to do
-  }
-  else if (lex_number())
-  {
+  } else if (lex_number()) {
     // nothing to do
-  }
-  else if (lex_string())
-  {
-    // Nothing
-  }
-  else if (lex_fixed())
-  {
+  } else if(lex_fixed()) {
     // nothing to do
-  }
-  else if (lex_kw_or_id())
-  {
+  } else if(lex_kw_or_id()) {
     // nothing to do
-  }
-  else
-  {
+  } else {
     // consume the invalid character
     consume();
   }
@@ -129,55 +78,43 @@ Lexer_Token Lexer::next()
 Lexer_Token Lexer::cur() { return _cur; }
 
 // get the next character from the stream
-void Lexer::read()
-{
+void Lexer::read() {
   // handle the start of new lines
-  if (_cur_char == '\n')
-  {
+  if (_cur_char == '\n') {
     _line++;
     _col = 0;
   }
 
   // read a character
   _cur_char = _is.get();
-  if (_is)
-  {
+  if (_is) {
     // increment the column if we have read the character
     _col++;
   }
 }
 
 // consume a character after it is matched
-void Lexer::consume()
-{
+void Lexer::consume() {
   _cur.lexeme += _cur_char;
   read();
 }
 
-
-
-
-
 // skip insignificant / non-token input
-void Lexer::skip()
-{
-  while (_is && _cur_char != '\n' && isspace(_cur_char))
-  {
+void Lexer::skip() {
+  while(_is && _cur_char != '\n' && isspace(_cur_char)) {
     read();
   }
+
   // skip comments
-  if (_cur_char == '#')
-  {
-    while (_is && _cur_char != '\n')
-    {
+  if(_cur_char == '#') {
+    while(_is && _cur_char != '\n') {
       read();
     }
   }
 }
 
 // attempt to match a single character token, return true on success
-bool Lexer::lex_single()
-{
+bool Lexer::lex_single() {
   // build our map of tokens
   std::map<char, Token> tokens;
   tokens['\n'] = NEWLINE;
@@ -191,13 +128,10 @@ bool Lexer::lex_single()
   tokens['='] = EQUAL;
   tokens['.'] = DOT;
   tokens[','] = COMMA;
-  tokens['['] = LBRAC;
-  tokens[']'] = RBRAC;
 
   // search for the current character in our map
   auto itr = tokens.find(_cur_char);
-  if (itr == tokens.end())
-  {
+  if (itr == tokens.end()) {
     // no match
     return false;
   }
@@ -210,8 +144,7 @@ bool Lexer::lex_single()
 }
 
 // attempt to match a number
-bool Lexer::lex_number()
-{
+bool Lexer::lex_number() {
   // verify that we start with a digit
   if (!isdigit(_cur_char))
     return false;
@@ -220,13 +153,11 @@ bool Lexer::lex_number()
   _cur.tok = INTLIT;
 
   // consume the digits
-  while (isdigit(_cur_char))
-  {
+  while (isdigit(_cur_char)) {
     consume();
   }
 
-  if (_cur_char != '.')
-  {
+  if (_cur_char != '.') {
     // we have matched an integer
     return true;
   }
@@ -237,8 +168,7 @@ bool Lexer::lex_number()
   // transition to an invalid token
   _cur.tok = INVALID;
 
-  if (not isdigit(_cur_char))
-  {
+  if (not isdigit(_cur_char)) {
     // we have matched invalid
     return true;
   }
@@ -247,58 +177,15 @@ bool Lexer::lex_number()
   _cur.tok = REALLIT;
 
   // consume the digits
-  while (isdigit(_cur_char))
-  {
+  while (isdigit(_cur_char)) {
     consume();
   }
 
   return true;
 }
-
-bool Lexer::lex_string()
-{
-  // verify that we start with a double quote
-  if (_cur_char != '"')
-    return false;
-
-  // consume the opening double quote
-  consume();
-
-  // transition to a string literal
-  _cur.tok = STRLIT;
-
-  // consume characters until the closing double quote
-  while (_cur_char != '\0' && _cur_char != '"')
-  {
-    consume();
-  }
-
-  if (_cur_char != '"')
-  {
-    // if we didn't find the closing double quote, set token to INVALID
-    _cur.tok = INVALID;
-  }
-  else
-  {
-    // consume the closing double quote
-    consume();
-  }
-
-  // Remove double quotes from _cur.lexeme
-  _cur.lexeme = _cur.lexeme.substr(1, _cur.lexeme.size() - 2);
-
-  return true;
-}
-
-
-
-
-
-
 
 // attempt to match a keyword or an id
-bool Lexer::lex_kw_or_id()
-{
+bool Lexer::lex_kw_or_id() {
   std::map<std::string, Token> tokens;
   tokens["MOD"] = MOD;
   tokens["display"] = DISPLAY;
@@ -310,58 +197,44 @@ bool Lexer::lex_kw_or_id()
   tokens["if"] = IF;
   tokens["while"] = WHILE;
   tokens["fun"] = FUN;
+  tokens["class"] = CLASS;
 
   // check to see if it starts properly
-  if (_cur_char != '_' and not isalpha(_cur_char))
-  {
-    return false;
-  }
+  if(_cur_char != '_' and not isalpha(_cur_char)){return false;}
 
   // consume all of the alpha numeric characters and _s
-  while (isalnum(_cur_char) or _cur_char == '_')
-  {
-    consume();
-  }
+  while(isalnum(_cur_char) or _cur_char == '_') { consume(); }
 
   auto itr = tokens.find(_cur.lexeme);
-  if (itr != tokens.end())
-  {
+  if(itr != tokens.end()) {
     _cur.tok = itr->second;
-  }
-  else
-  {
-    _cur.tok = ID;
+  } else {
+    _cur.tok = ID; 
   }
 
   return true;
 }
 
+  
 // attempt to match a fixed-width unconstrained token
 bool Lexer::lex_fixed()
 {
   // check for <
-  if (_cur_char == '<')
-  {
+  if(_cur_char == '<') {
     _cur.tok = LT;
     consume();
-    if (_cur_char == '>')
-    {
+    if(_cur_char == '>') {
       _cur.tok = NE;
       consume();
-    }
-    else if (_cur_char == '=')
-    {
+    } else if(_cur_char == '=') {
       _cur.tok = LTE;
       consume();
     }
     return true;
-  }
-  else if (_cur_char == '>')
-  {
+  } else if(_cur_char == '>') {
     _cur.tok = GT;
     consume();
-    if (_cur_char == '=')
-    {
+    if(_cur_char == '=') {
       _cur.tok = GTE;
       consume();
     }
@@ -369,23 +242,5 @@ bool Lexer::lex_fixed()
     return true;
   }
 
-  return false;
-}
-
-bool Lexer::lex_bracket()
-{
-  if (_cur_char == '[')
-  {
-    consume();
-    _cur.tok = LBRAC;
-    return true;
-  }
-  else if (_cur_char == ']')
-  {
-    consume();
-    _cur.tok = RBRAC;
-    return true;
-  }
-  _cur.tok = VECT_LITERAL;
   return false;
 }

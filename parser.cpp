@@ -141,6 +141,9 @@ Parse_Tree *Parser::parse_Statement_Body() {
     result = parse_Loop();
   } else if(has(FUN)) {
     result = parse_Fun_Def();
+  } else if(has(CLASS))
+  {
+    result = parse_Class_Declaration();
   } else if(not has(NEWLINE)) {
     result = parse_Expression();
   } else {
@@ -448,17 +451,7 @@ Parse_Tree *Parser::parse_Number() {
     return new Literal(consume());
   } else if (has(REALLIT)) {
     return new Literal(consume());
-  }
-  else if(has(STRLIT))
-  {
-    return new Literal(consume());
-  }
-   else {
-
-    if(has(LBRAC))
-    {
-      return parse_List();
-    }
+  } else {
     must_be(ID);
     return parse_Ref();
   }
@@ -632,34 +625,4 @@ Parse_Tree* Parser::parse_Arg_List() {
   } while(not done);
 
   return result;
-}
-
-
-
-
-Parse_Tree* Parser::parse_List() {
-    if (has(LBRAC)) {
-        consume();
-        Parse_Tree* list = parse_List_Elements();
-        must_be(RBRAC);
-        consume();
-        return list;
-    }
-    return nullptr;
-}
-
-Parse_Tree* Parser::parse_List_Elements() {
-    Parse_List* list = new Parse_List();
-
-    while (!has(RBRAC)) {
-        list->add(parse_Expression());
-
-        if (has(COMMA)) {
-            consume();  // Consume the comma
-        } else {
-            break;  // No more elements in the list
-        }
-    }
-
-    return list;
 }

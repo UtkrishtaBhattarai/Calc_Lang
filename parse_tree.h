@@ -5,21 +5,30 @@
 #include <vector>
 #include "lexer.h"
 #include "ref_env.h"
-#include <list>
-#include <variant>
+
 // class prototype
 class Ref_Env;
 class Fun_Def;
+class Class_Def;
+
+class Closure 
+{
+public:
+  Fun_Def *fun;
+  Ref_Env *env;
+
+  Closure(Fun_Def *fun, Ref_Env *env);
+};
+
 
 //////////////////////////////////////////
 // Evaluation Results
 //////////////////////////////////////////
-enum EvalType {VOID, INTEGER, REAL, UNDEFINED, BOOLEAN, FUNCTION, STRING, LIST};
+enum EvalType {VOID, INTEGER, REAL, UNDEFINED, BOOLEAN, FUNCTION};
 class EvalResult
 {
 public:
   EvalResult();
-  using MyVariant = std::variant<int, double, std::string>;
 
   // set the type and zero the value
   virtual void set_type(EvalType _type);
@@ -28,18 +37,13 @@ public:
   virtual void set(int _i);
   virtual void set(double _d);
   virtual void set(bool _b);
-  virtual void set(std::string _b);
-  virtual void set(Fun_Def *_fun);
-  virtual void set(std::vector<MyVariant> _myVector);
-
+  virtual void set(Closure *_fun);
 
   // type coercion functions
   virtual int as_integer();
   virtual double as_real();
   virtual bool as_bool();
-  virtual Fun_Def* as_fun();
-  virtual std::string as_string();
-  virtual std::vector<MyVariant> as_vector();
+  virtual Closure* as_fun();
 
   // retrieve the type
   virtual EvalType type();
@@ -48,9 +52,7 @@ private:
   double _d;       // a real number
   bool _b;         // a boolean value
   EvalType _type;  // the type
-  Fun_Def* _fun;    // a function definition 
-  std::string _str;
-  std::vector<MyVariant> _myVector;
+  Closure* _fun;    // a function definition 
 };
 
 //////////////////////////////////////////
@@ -306,6 +308,18 @@ public:
 class Fun_Def: public BinaryOp {
 public:
   Fun_Def (const Lexer_Token &tok);
+  virtual EvalResult eval(Ref_Env *env);
+  virtual void print(int indent) const;
+  virtual std::string name() const;
+
+private:
+  Variable var;
+};
+
+
+class Class_Def: public BinaryOp {
+public:
+  Class_Def (const Lexer_Token &tok);
   virtual EvalResult eval(Ref_Env *env);
   virtual void print(int indent) const;
   virtual std::string name() const;

@@ -1,0 +1,40 @@
+# Point object with the following functions
+# 1 - getX
+# 2 - getY
+# 3 - midpoint(point)
+fun point(x, y)
+  fun getX()
+    x
+  end fun
+
+  fun getY()
+    y
+  end fun
+
+  fun midpoint(other)
+    other_getX = other(1)
+    other_getY = other(2)
+    display (getX() + other_getX()) / 2.0
+    display (getY() + other_getY()) / 2.0
+  end fun
+
+  fun getMember(n)
+    if n = 1
+      result = getX
+    end if 
+    if n = 2
+       result = getY
+    end if
+    if n = 3
+       result = midpoint
+    end if
+    result
+  end fun
+
+  getMember
+end fun
+
+p1 = point(1, 2)
+p2 = point(3, 4)
+p1_midpoint = p1(3)
+p1_midpoint(p2)

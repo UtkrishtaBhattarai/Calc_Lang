@@ -5,7 +5,13 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
-#include <vector>
+
+// Closure Constructor
+Closure::Closure(Fun_Def *fun, Ref_Env *env)
+{
+  this->fun = fun;
+  this->env = env;
+}
 
 //////////////////////////////////////////
 // Evaluation Results
@@ -29,25 +35,13 @@ void EvalResult::set(double _d) {
   _type = REAL;
 }
 
-void EvalResult::set(std::string _str)
-{
-  this-> _str = _str;
-  _type = STRING;
-}
-
-void EvalResult::set(std::vector<MyVariant> _myvector)
-{
-  this->_myVector = _myVector;
-  _type = LIST;
-}
-
 
 void EvalResult::set(bool _b) {
   this->_b = _b;
   _type = BOOLEAN;
 }
 
-void EvalResult::set(Fun_Def *_fun) {
+void EvalResult::set(Closure *_fun) {
   this->_fun = _fun;
   _type = FUNCTION;
 }
@@ -74,32 +68,8 @@ bool EvalResult::as_bool() {
   return _b;
 }
 
-Fun_Def *EvalResult::as_fun() {
+Closure *EvalResult::as_fun() {
   return _fun;
-}
-
-std::string EvalResult::as_string()
-{
-  if(_type == STRING)
-  {
-    return std::string(_str);
-  }
-  else
-  {
-    return _str;
-  }
-  
-}
-
-using MyVariant = std::variant<int, double, std::string>;
-
-std::vector<MyVariant> EvalResult::as_vector()
-{
-  if (_type == LIST)
-  {
-    return _myVector;
-  }
-  return _myVector;
 }
 
 // retrieve the type
@@ -187,13 +157,7 @@ EvalResult Add::eval(Ref_Env *env) {
     // real arithmetic
     double x = l.as_real() + r.as_real();
     result.set(x);
-  }
-  if(l.type() == STRING and r.type()== STRING)
-  {
-    std::string x = l.as_string() + r.as_string();
-    result.set(x);
-  }
-   else {
+  } else {
     // integer arithmetic
     int x = l.as_integer() + r.as_integer();
     result.set(x);
@@ -378,18 +342,7 @@ EvalResult Literal::eval(Ref_Env *env) {
 
   if (_tok.tok == INTLIT) {
     result.set(stoi(_tok.lexeme));
-  }
-  else if(_tok.tok == STRLIT)
-  {
-    result.set(_tok.lexeme);
-  }
-
-
-  else if(_tok.tok == VECT_LITERAL)
-  {
-    result.set(_tok.lexeme);
-  }
-   else {
+  } else {
     result.set(stof(_tok.lexeme));
   }
 
@@ -453,14 +406,6 @@ EvalResult Display::eval(Ref_Env *env) {
   } else if (value.type() == REAL) {
     std::cout << value.as_real() << std::endl;
   }
-  else if(value.type() == STRING)
-  {
-    std::cout << value.as_string() << std::endl;
-  }
-  else if(value.type() == LIST)
-  {
-    std:: cout << value.type()  << std::endl;
-  }
 
   return result;
 }
@@ -473,53 +418,28 @@ void Display::print(int indent) const {
   child()->print(indent + 1);
 }
 
-
-
 EvalResult Input::eval(Ref_Env *env) {
-    EvalResult result;
-    Variable *v = static_cast<Variable*>(child());
-    std::string input;
+  EvalResult result;
+  Variable *v = (Variable*) child();
+  double num;
 
-    // print the prompt and get the input
-    std::cout << v->name() << "=";
+  // print the prompt and get the number
+  std::cout << v->name() << "=";
+  std::cin >> num;
 
-    // Read the entire line, including spaces
-    std::getline(std::cin, input);
+  // build the value to the smallest type 
+  EvalResult value;
+  if(num - (int) num == 0.0) {
+    value.set((int) num);
+  } else {
+    value.set(num);
+  }
 
-    // Check if the input starts and ends with double quotes, treat as string
-    if (input.size() >= 2 && input.front() == '"' && input.back() == '"') {
-        input = input.substr(1, input.size() - 2);  // Remove the double quotes
-        EvalResult value;
-        value.set(input);
-        v->set(env, value);
-    } else {
-        // Check if the input is numeric
-        try {
-            size_t pos;
-            double num = std::stod(input, &pos);
+  // bind the variable
+  v->set(env, value);
 
-            if (pos == input.size()) {
-                EvalResult value;
-
-                // Check if the numeric value is an integer or has a fractional part
-                if (std::floor(num) == num) {
-                    value.set(static_cast<int>(num));
-                } else {
-                    value.set(num);
-                }
-
-                v->set(env, value);
-            } else {
-                std::cerr << "Invalid numeric input: " << input << std::endl;
-            }
-        } catch (const std::invalid_argument& e) {
-            std::cerr << "Invalid input: " << input << std::endl;
-        }
-    }
-
-    return result;
+  return result;
 }
-
 
 void Input::print(int indent) const {
   // print myself
@@ -584,7 +504,7 @@ EvalResult Branch::eval(Ref_Env *env) {
   EvalResult result;
 
   if(left()->eval(env).as_bool()) {
-    result = right()->eval(env);
+    right()->eval(env);
   }
 
   return result;
@@ -609,7 +529,7 @@ EvalResult Loop::eval(Ref_Env *env) {
   EvalResult result;
 
   while(left()->eval(env).as_bool()) {
-    result = right()->eval(env);
+    right()->eval(env);
   }
 
   return result;
@@ -878,13 +798,9 @@ Fun_Def::Fun_Def (const Lexer_Token &tok) : var(tok)
 
 EvalResult Fun_Def::eval(Ref_Env *env)
 {
-  // build a container to store ourselves in the environment
-  EvalResult fun;
-  fun.set(this);
-
-  //insert ourselves into the environment
-  var.set(env, fun);
-  
+  EvalResult value;
+  value.set(new Closure(this, env));
+  env->set(name(), value);
   return EvalResult();
 }
 
@@ -911,44 +827,34 @@ void Fun_Def::print(int indent) const
 
 EvalResult Fun_Call::eval(Ref_Env *env)
 {
-  Variable *fref = (Variable *) left(); 
-  EvalResult fun = fref->eval(env);
+  // retrieve the function
+  EvalResult fr = left()->eval(env);
 
-  // check to see if it's a function
-  if(fun.type() != FUNCTION) {
-    std::cerr << "Error: " << fref->name() << " is not a function." << std::endl;
+  // if we don't have a function, return an error
+  if(fr.type() != FUNCTION) {
+    std::cerr << "Error: Attempted to call a non-function" << std::endl;
     return EvalResult();
   }
 
-  // create a local scope for the function
-  Ref_Env *local_env = new Ref_Env(env);
-
-  // bind the parameters to the local scope
-  Parse_List *params = (Parse_List *) (fun.as_fun()->left());
-  Parse_List *args = (Parse_List*) right();
-  int param_count = params->end() - params->begin();
-  int arg_count = args->end() - args->begin();
-  if(param_count > arg_count) { 
-    std::cerr << "Error: Too few arguments for function " << fref->name() << std::endl;
-    return EvalResult();
-  } else if(param_count < arg_count) {
-    std::cerr << "Error: Too many arguments for function " << fref->name() << std::endl;
+  // Check parameter binding
+  Closure *closure = fr.as_fun();
+  Parse_List *params = (Parse_List *) (closure->fun->left());
+  Parse_List *args = (Parse_List*) (right());
+  if(params->end() - params->begin() != args->end() - args->begin()) {
+    std::cerr << "Error: Incorrect number of arguments" << std::endl;
     return EvalResult();
   }
 
+  // Create a local scope and bind the arguments
+  Ref_Env *local = new Ref_Env(closure->env);
   for(auto pitr = params->begin(), aitr = args->begin(); pitr != params->end(); pitr++, aitr++) {
-    Variable *v = (Variable *) *pitr;
-    local_env->declare(v->name());  // force parameters to be local
-    local_env->set(v->name(), (*aitr)->eval(env));
+    Variable * var = (Variable *) (*pitr);
+    Parse_Tree * arg = *aitr;
+    local->declare(var->name()); // <-- Forces the parameter to be local
+    var->set(local, arg->eval(env)); // <-- Binds the argument
   }
-
-  //evaluate the function and return the result
-  EvalResult result = fun.as_fun()->right()->eval(local_env); 
-
-  // destroy the local environment
-  delete local_env;
-
-  return result;
+  
+  return closure->fun->right()->eval(local);
 }
 
 
@@ -959,3 +865,55 @@ void Fun_Call::print(int indent) const
   left()->print(indent+1);
   right()->print(indent+1);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Class_Def::Class_Def (const Lexer_Token &tok) : var(tok)
+{
+}
+
+
+EvalResult Class_Def::eval(Ref_Env *env)
+{
+  EvalResult value;
+  env->set(name(), value);
+  return EvalResult();
+}
+
+
+std::string Class_Def::name() const 
+{
+  return var.name();
+}
+
+
+void Class_Def::print(int indent) const
+{
+  // print ourself
+  std::cout << std::setw(indent) << "";
+  std::cout << "fun " << name() << std::endl;
+  std::cout << std::setw(indent) << "";
+  std::cout << "Parameters";
+  left()->print(indent+1);
+  std::cout << std::setw(indent) << "";
+  std::cout << "Body";
+  right()->print(indent+1);
+}
+

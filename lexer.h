@@ -38,10 +38,7 @@ enum Token {
   GTE,
   FUN,
   COMMA,
-  STRLIT,
-  LBRAC, 
-  RBRAC,
-  VECT_LITERAL
+  CLASS,
 };
 
 // Tokens as emitted by the lexer
@@ -54,7 +51,6 @@ public:
   std::string lexeme;
   int line;
   int col;
-  
 };
 std::ostream &operator<<(std::ostream &os, const Lexer_Token &t);
 
@@ -69,7 +65,7 @@ public:
 
   //return the current token
   Lexer_Token cur();
-  
+
 private:
   std::istream &_is;
   char _cur_char;
@@ -92,17 +88,11 @@ private:
   // attempt to match a number
   bool lex_number();
 
-  //attempt to match a string
-  bool lex_string();
-
   // attempt to match a keyword or an id
   bool lex_kw_or_id();
 
   // attempt to match a fixed-width unconstrained token
   bool lex_fixed();
-
-  bool lex_bracket();
-
 };
 
 #endif

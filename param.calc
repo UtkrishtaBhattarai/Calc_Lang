@@ -1,0 +1,6 @@
+fun f(x) 
+  display x
+  x + 5
+end fun
+
+display f(12)
