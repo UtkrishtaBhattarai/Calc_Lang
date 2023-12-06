@@ -115,7 +115,6 @@ std::vector<int> EvalResult::as_array() {
         return _myarray;
     }
     // Handle the case where the type is not an array or the array is empty
-    // You can return an empty vector or throw an error depending on your design
     return std::vector<int>();
 }
 
@@ -1103,9 +1102,9 @@ EvalResult Array_Access::eval(Ref_Env *env)
     // Check if the array variable exists in the environment
     EvalResult *arrayVar = env->lookup(arrayName);
 
-    EvalResult *arrayval = env->lookup(index_.lexeme);
+    // EvalResult *arrayval = env->lookup(index_.lexeme);
 
-    int arr_index = arrayval->as_integer();
+    // int arr_index = arrayval->as_integer();
 
     // Check if the arrayVar is an array
     if (arrayVar->type() != EvalType::VECTOR)
@@ -1117,12 +1116,28 @@ EvalResult Array_Access::eval(Ref_Env *env)
     // // Retrieve the vector from EvalResult
     std::vector<int> arrayValues = arrayVar->as_array();
 
-    // // Check if the index is within bounds
-    if (arr_index < 0 || arr_index >= arrayValues.size())
+    int arr_index;
+    try
     {
-        std::cerr << "Error: Index out of bounds for array " << arrayName << std::endl;
+        arr_index = std::stoi(index_.lexeme);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        std::cerr << "Error: Invalid index for array " << arrayName << std::endl;
         return EvalResult(); // Return an undefined result
     }
+    catch (const std::out_of_range &e)
+    {
+        std::cerr << "Error: Index out of range for array " << arrayName << std::endl;
+        return EvalResult(); // Return an undefined result
+    }
+
+    // // Check if the index is within bounds
+    // if (arr_index < 0 || arr_index >= arrayValues.size())
+    // {
+        // std::cerr << "Error: Index out of bounds for array " << arrayName << std::endl;
+        // return EvalResult(); // Return an undefined result
+    // }
 
     // // Create a new EvalResult object and set its value
     EvalResult result;
