@@ -43,6 +43,12 @@ enum Token {
   ARRAY,
   LBRACKET,
   RBRACKET,
+  OF, 
+  WITH,
+  BOUNDS,
+  SET,
+  GET,
+
 
 };
 

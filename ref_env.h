@@ -30,7 +30,6 @@ public:
   // Modify the parent
   virtual void parent(Ref_Env *_parent);
 
-protected:
   // Find a name's location
   virtual EvalResult* lookup(const std::string &name);
 

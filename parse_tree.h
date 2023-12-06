@@ -24,11 +24,13 @@ public:
 //////////////////////////////////////////
 // Evaluation Results
 //////////////////////////////////////////
-enum EvalType {VOID, INTEGER, REAL, UNDEFINED, BOOLEAN, FUNCTION, STRING};
+enum EvalType {VOID, INTEGER, REAL, UNDEFINED, BOOLEAN, FUNCTION, STRING, VECTOR};
 class EvalResult
 {
 public:
   EvalResult();
+
+
 
   // set the type and zero the value
   virtual void set_type(EvalType _type);
@@ -39,6 +41,7 @@ public:
   virtual void set(bool _b);
   virtual void set(Closure *_fun);
   virtual void set(std::string _b);
+  virtual void set(std::vector<std::string> _myarray );
 
 
   // type coercion functions
@@ -47,6 +50,7 @@ public:
   virtual bool as_bool();
   virtual Closure* as_fun();
   virtual std::string as_string();
+  virtual std::vector<std::string> as_array();
   
 
 
@@ -59,6 +63,7 @@ private:
   EvalType _type;  // the type
   Closure* _fun;    // a function definition 
   std::string _str;  // a string defination
+  std::vector<std::string> _myarray; // for an array or vector
 
 };
 
@@ -329,4 +334,40 @@ public:
   virtual EvalResult eval(Ref_Env *env);
   virtual void print(int indent) const;
 };
+
+
+// Add this to parse_tree.h
+
+class Array_Declaration : public Parse_Tree {
+public:
+    Array_Declaration(const Lexer_Token &type, int bound, const Lexer_Token &name);
+    EvalResult eval(Ref_Env *env) override;
+    void print(int indent) const override;
+
+private:
+    Lexer_Token type_;
+    int bound_;
+    Lexer_Token name_;
+};
+
+
+class ArrayAssignment : public BinaryOp {
+public:
+
+  // Evaluate the array assignment operation
+  virtual EvalResult eval(Ref_Env *env);
+  void print(int indent) const override;
+};
+
+class Array_Access : public Parse_Tree {
+public:
+    Array_Access(const Lexer_Token& name_array, int index);
+    virtual EvalResult eval(Ref_Env* env) override;
+    void print(int indent) const override;
+
+private:
+    Lexer_Token name_array;
+    int index_;
+};
+
 #endif

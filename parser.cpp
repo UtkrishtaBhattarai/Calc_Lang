@@ -138,6 +138,7 @@ Parse_Tree *Parser::parse_Statement_Body()
 
   if (has(ID))
   {
+    
     // get the ID from parse_Number
     result = parse_Ref();
     result = parse_Statement2(result);
@@ -161,6 +162,10 @@ Parse_Tree *Parser::parse_Statement_Body()
   else if (has(FUN))
   {
     result = parse_Fun_Def();
+  }
+  else if(has(ARRAY))
+  {
+    result = parse_Array_Decl();
   }
   else if (not has(NEWLINE))
   {
@@ -217,6 +222,7 @@ Parse_Tree *Parser::parse_Statement2(Parse_Tree *left)
     result->right(parse_Statement3(result));
     return result;
   }
+
   else
   {
     result = parse_Factor2(left);
@@ -658,7 +664,32 @@ Parse_Tree *Parser::parse_Condition2(Parse_Tree *left)
 Parse_Tree *Parser::parse_Ref()
 {
   must_be(ID);
+  Lexer_Token lx = _lex->cur();
+  
   Parse_Tree *left = new Variable(consume());
+  if(has(DOT))
+  {
+    consume();
+    if (has(SET))
+    {
+      consume();  
+    ArrayAssignment *result = new ArrayAssignment();
+    result->left(left);
+    result->right(parse_Statement3(result));
+    return result;
+    }
+
+    else if(has(GET))
+    {
+      consume();
+      must_be(INTLIT);
+      int arr_index;
+      arr_index = std::atoi(_lex->cur().lexeme.c_str());
+      consume();
+      Array_Access *result = new Array_Access(lx, arr_index);
+      return result;
+      }
+  }
   return parse_Ref2(left);
 }
 
@@ -729,3 +760,30 @@ Parse_Tree *Parser::parse_Arg_List()
 
   return result;
 }
+
+
+
+
+
+Parse_Tree *Parser::parse_Array_Decl()
+{
+  must_be(ARRAY);
+  consume();
+  must_be(OF);
+  consume();
+  Lexer_Token typeToken = consume();
+  must_be(WITH);
+  consume();
+  must_be(BOUNDS);
+  consume();
+  must_be(LBRACKET);
+  consume();
+  int bounds = std::stoi(_lex->cur().lexeme);
+  consume();
+  must_be(RBRACKET);
+  consume();
+  Lexer_Token arrayName = consume();
+
+  return new Array_Declaration(typeToken, bounds, arrayName);
+}
+

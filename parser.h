@@ -60,4 +60,7 @@ private:
   Parse_Tree* parse_Ref();
   Parse_Tree* parse_Ref2(Parse_Tree *left);
   Parse_Tree* parse_Arg_List();
+
+  Parse_Tree* parse_Array_Decl();
+  
 };

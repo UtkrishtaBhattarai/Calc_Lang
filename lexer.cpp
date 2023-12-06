@@ -28,7 +28,9 @@ std::ostream &operator<<(std::ostream &os, const Lexer_Token &t) {
       "MOD",     "POW", "LPAREN",  "RPAREN", "INTLIT", "REALLIT", "EQUAL",
        "DISPLAY", "INPUT", "ID", "DOT", "NEW", "RECORD", "END", "FIELD",
         "IF", "WHILE", "NE", "LT", "GT", "LTE", "GTE", "FUN", "COMMA", "CLASS", "STRLIT","ARRAY", "LBRACKET",
-  "RBRACKET",};
+  "RBRACKET","OF", 
+  "WITH",
+  "BOUNDS","SET","GET"};
   return os << token_label[t.tok] << " \"" << t.lexeme << "\" Line: " << t.line
             << " Column " << t.col;
 }
@@ -206,6 +208,11 @@ bool Lexer::lex_kw_or_id() {
   tokens["fun"] = FUN;
   tokens["class"] = CLASS;
   tokens["array"] = ARRAY;
+  tokens["of"] = OF;
+  tokens["with"] = WITH;
+  tokens["bound"] = BOUNDS;
+  tokens["set"] = SET;
+  tokens["get"] = GET;
 
   // check to see if it starts properly
   if(_cur_char != '_' and not isalpha(_cur_char)){return false;}
