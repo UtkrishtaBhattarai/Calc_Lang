@@ -1018,12 +1018,9 @@ EvalResult Array_Declaration::eval(Ref_Env *env)
   std::vector<int> arrayValues;
 
   if (env->lookup(name)) {
-    // Handle error: Array with the same name already declared
-    // Provide a clear error message
     std::cerr << "Same array is already defined";
     return EvalResult();
 }
-  // Create EvalResult with array type and values
   EvalResult result;
   result.set(arrayValues);
 
@@ -1134,10 +1131,47 @@ EvalResult Array_Access::eval(Ref_Env *env)
     return result;
 }
 
-
-
-
 void Array_Access::print(int indent) const
+{
+  // Print the array declaration
+  std::cout << std::setw(indent) << "";
+  std::cout << "Array Assignment" << std::endl;
+}
+
+Array_Size::Array_Size(const Lexer_Token &name_array)
+    : name_array(name_array)
+{
+    // Constructor implementation if needed
+}
+
+EvalResult Array_Size::eval(Ref_Env *env)
+{
+    // Retrieve the array name
+    std::string arrayName = name_array.lexeme;
+
+    // Check if the array variable exists in the environment
+    EvalResult *arrayVar = env->lookup(arrayName);
+
+
+    // Check if the arrayVar is an array
+    if (arrayVar->type() != EvalType::VECTOR)
+    {
+        std::cerr << "Error: " << arrayName << " is not an array." << std::endl;
+        return EvalResult(); // Return an undefined result
+    }
+
+    // // Retrieve the vector from EvalResult
+    std::vector<int> arrayValues = arrayVar->as_array();
+    int arr_size = (int) arrayValues.size();
+
+  
+    // // Create a new EvalResult object and set its value
+    EvalResult result;
+    result.set(arr_size);
+    return result;
+}
+
+void Array_Size::print(int indent) const
 {
   // Print the array declaration
   std::cout << std::setw(indent) << "";

@@ -1,0 +1,5 @@
+ARRAYS
+# define arrays by "array of int with bound [10] array_name"
+# set arrays values by "array_name.set value
+# get arrays values by "array_name.get index
+# get array size by "array_name.size"

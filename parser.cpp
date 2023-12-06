@@ -681,24 +681,19 @@ Parse_Tree *Parser::parse_Ref()
     else if (has(GET))
     {
       consume();
-      if (has(ID))
+      if (has(ID) or has(INTLIT))
       {
         Lexer_Token arr_index = _lex->cur();
         consume();
         Array_Access *result = new Array_Access(lx, arr_index);
         return result;
       }
-
-      // else if (has(INTLIT))
-      // {
-      //   {
-      //     int arr_index;
-      //     arr_index = std::atoi(_lex->cur().lexeme.c_str());
-      //     consume();
-      //     Array_Access *result = new Array_Access(lx, arr_index);
-      //     return result;
-      //   }
-      // }
+    }
+    else if(has(SIZE))
+    {
+      consume();
+        Array_Size *result = new Array_Size(lx);
+        return result;
     }
   }
   return parse_Ref2(left);

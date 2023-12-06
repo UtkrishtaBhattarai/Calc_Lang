@@ -48,8 +48,7 @@ enum Token {
   BOUNDS,
   SET,
   GET,
-
-
+  SIZE,
 };
 
 // Tokens as emitted by the lexer

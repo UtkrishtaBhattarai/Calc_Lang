@@ -9,6 +9,7 @@ while i <= 9
     i = i + 1
 end while
 
+display "Original Array"
 display my_arr
 
 j = 9

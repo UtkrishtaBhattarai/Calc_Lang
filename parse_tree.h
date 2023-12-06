@@ -370,4 +370,16 @@ private:
     Lexer_Token index_;
 };
 
+
+
+class Array_Size : public Parse_Tree {
+public:
+    Array_Size(const Lexer_Token& name_array);
+    virtual EvalResult eval(Ref_Env* env) override;
+    void print(int indent) const override;
+
+private:
+    Lexer_Token name_array;
+};
+
 #endif
