@@ -57,7 +57,7 @@ void EvalResult::set(Closure *_fun)
   _type = FUNCTION;
 }
 
-void EvalResult::set(std::vector<std::string> _myarray)
+void EvalResult::set(std::vector<int> _myarray)
 {
   this->_myarray = _myarray;
   _type = VECTOR;
@@ -72,7 +72,7 @@ int EvalResult::as_integer()
   }
   else
   {
-    return (int)_d;
+    return (int)(_d);
   }
 }
 
@@ -110,13 +110,13 @@ Closure *EvalResult::as_fun()
   return _fun;
 }
 
-std::vector<std::string> EvalResult::as_array() {
+std::vector<int> EvalResult::as_array() {
     if (_type == VECTOR && !_myarray.empty()) {
         return _myarray;
     }
     // Handle the case where the type is not an array or the array is empty
     // You can return an empty vector or throw an error depending on your design
-    return std::vector<std::string>();
+    return std::vector<int>();
 }
 
 
@@ -452,7 +452,7 @@ EvalResult Literal::eval(Ref_Env *env)
 void Literal::print(int indent) const
 {
   // print ourself
-  std::cout << std::setw(indent) << "";
+  std::cout << std::setw(indent) << " ";
   std::cout << _tok.lexeme << std::endl;
 }
 
@@ -520,7 +520,17 @@ EvalResult Display::eval(Ref_Env *env)
   {
     std::cout << value.as_real() << std::endl;
   }
+else if (value.type() == VECTOR)
+{
+    std::vector<int, std::allocator<int>> arrayElements = value.as_array();
 
+    std::cout << "[";
+    for (const int& element : arrayElements)
+    {
+        std::cout << element << ",";
+    }
+    std::cout << "]" << std::endl;
+}
   return result;
 }
 
@@ -998,13 +1008,21 @@ Array_Declaration::Array_Declaration(const Lexer_Token &type, int bound, const L
 
 EvalResult Array_Declaration::eval(Ref_Env *env)
 {
+
+  
   std::string ref_type = type_.lexeme; // Assuming type_ is a Lexer_Token
   int bounds = bound_;                 // Assuming bound_ is an integer
   std::string name = name_.lexeme;     // Assuming name_ is a Lexer_Token
 
   // Construct the array values (e.g., initialize with zeros)
-  std::vector<std::string> arrayValues;
+  std::vector<int> arrayValues;
 
+  if (env->lookup(name)) {
+    // Handle error: Array with the same name already declared
+    // Provide a clear error message
+    std::cerr << "Same array is already defined";
+    return EvalResult();
+}
   // Create EvalResult with array type and values
   EvalResult result;
   result.set(arrayValues);
@@ -1054,10 +1072,10 @@ if (arrayVariable)
     std::string arrayName = arrayVariable->name();
 
     // Retrieve the vector from EvalResult
-    std::vector<std::string> arrayValues = arrayResult.as_array();
+    std::vector<int> arrayValues = arrayResult.as_array();
 
     // Push the value to the end of the array
-    arrayValues.push_back(right()->eval(env).as_string());
+    arrayValues.push_back(right()->eval(env).as_integer());
 
     // Update the array in the environment
     EvalResult updatedArray;
@@ -1074,7 +1092,7 @@ void ArrayAssignment::print(int indent) const
   std::cout << "Array Assignment" << std::endl;
 }
 
-Array_Access::Array_Access(const Lexer_Token &name_array, int index)
+Array_Access::Array_Access(const Lexer_Token &name_array, Lexer_Token &index)
     : name_array(name_array), index_(index)
 {
     // Constructor implementation if needed
@@ -1088,6 +1106,10 @@ EvalResult Array_Access::eval(Ref_Env *env)
     // Check if the array variable exists in the environment
     EvalResult *arrayVar = env->lookup(arrayName);
 
+    EvalResult *arrayval = env->lookup(index_.lexeme);
+
+    int arr_index = arrayval->as_integer();
+
     // Check if the arrayVar is an array
     if (arrayVar->type() != EvalType::VECTOR)
     {
@@ -1095,19 +1117,19 @@ EvalResult Array_Access::eval(Ref_Env *env)
         return EvalResult(); // Return an undefined result
     }
 
-    // Retrieve the vector from EvalResult
-    std::vector<std::string> arrayValues = arrayVar->as_array();
+    // // Retrieve the vector from EvalResult
+    std::vector<int> arrayValues = arrayVar->as_array();
 
-    // Check if the index is within bounds
-    if (index_ < 0 || index_ >= arrayValues.size())
+    // // Check if the index is within bounds
+    if (arr_index < 0 || arr_index >= arrayValues.size())
     {
         std::cerr << "Error: Index out of bounds for array " << arrayName << std::endl;
         return EvalResult(); // Return an undefined result
     }
 
-    // Create a new EvalResult object and set its value
+    // // Create a new EvalResult object and set its value
     EvalResult result;
-    result.set(arrayValues[index_]);
+    result.set((arrayValues[arr_index]));
 
     return result;
 }

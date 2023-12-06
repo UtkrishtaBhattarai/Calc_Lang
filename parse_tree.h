@@ -41,7 +41,7 @@ public:
   virtual void set(bool _b);
   virtual void set(Closure *_fun);
   virtual void set(std::string _b);
-  virtual void set(std::vector<std::string> _myarray );
+  virtual void set(std::vector<int> _myarray );
 
 
   // type coercion functions
@@ -50,7 +50,7 @@ public:
   virtual bool as_bool();
   virtual Closure* as_fun();
   virtual std::string as_string();
-  virtual std::vector<std::string> as_array();
+  virtual std::vector<int> as_array();
   
 
 
@@ -63,7 +63,7 @@ private:
   EvalType _type;  // the type
   Closure* _fun;    // a function definition 
   std::string _str;  // a string defination
-  std::vector<std::string> _myarray; // for an array or vector
+  std::vector<int> _myarray; // for an array or vector
 
 };
 
@@ -361,13 +361,13 @@ public:
 
 class Array_Access : public Parse_Tree {
 public:
-    Array_Access(const Lexer_Token& name_array, int index);
+    Array_Access(const Lexer_Token& name_array, Lexer_Token &index);
     virtual EvalResult eval(Ref_Env* env) override;
     void print(int indent) const override;
 
 private:
     Lexer_Token name_array;
-    int index_;
+    Lexer_Token index_;
 };
 
 #endif

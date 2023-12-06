@@ -1,0 +1,24 @@
+array of int with bound [10] my_arr
+array of int with bound[10] my_rev_array
+
+
+i = 0
+while i <= 9
+    input temp
+    my_arr.set temp
+    i = i + 1
+end while
+
+display my_arr
+
+j = 9
+
+while j>=0
+    temp_var = my_arr.get j
+    my_rev_array.set temp_var
+    j = j - 1
+end while 
+
+display "Reversed Array"
+display my_rev_array
+

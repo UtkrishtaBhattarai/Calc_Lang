@@ -1,0 +1,12 @@
+array of str with bound [10] arr
+array of int with bound [5] bekaar
+
+
+arr.set 2
+bekaar.set 4
+
+
+x = arr.get 0
+y = bekaar.get 0
+
+display y + x

@@ -138,7 +138,7 @@ Parse_Tree *Parser::parse_Statement_Body()
 
   if (has(ID))
   {
-    
+
     // get the ID from parse_Number
     result = parse_Ref();
     result = parse_Statement2(result);
@@ -163,7 +163,7 @@ Parse_Tree *Parser::parse_Statement_Body()
   {
     result = parse_Fun_Def();
   }
-  else if(has(ARRAY))
+  else if (has(ARRAY))
   {
     result = parse_Array_Decl();
   }
@@ -665,30 +665,41 @@ Parse_Tree *Parser::parse_Ref()
 {
   must_be(ID);
   Lexer_Token lx = _lex->cur();
-  
   Parse_Tree *left = new Variable(consume());
-  if(has(DOT))
+  if (has(DOT))
   {
     consume();
     if (has(SET))
     {
-      consume();  
-    ArrayAssignment *result = new ArrayAssignment();
-    result->left(left);
-    result->right(parse_Statement3(result));
-    return result;
+      consume();
+      ArrayAssignment *result = new ArrayAssignment();
+      result->left(left);
+      result->right(parse_Statement3(result));
+      return result;
     }
 
-    else if(has(GET))
+    else if (has(GET))
     {
       consume();
-      must_be(INTLIT);
-      int arr_index;
-      arr_index = std::atoi(_lex->cur().lexeme.c_str());
-      consume();
-      Array_Access *result = new Array_Access(lx, arr_index);
-      return result;
+      if (has(ID))
+      {
+        Lexer_Token arr_index = _lex->cur();
+        consume();
+        Array_Access *result = new Array_Access(lx, arr_index);
+        return result;
       }
+
+      // else if (has(INTLIT))
+      // {
+      //   {
+      //     int arr_index;
+      //     arr_index = std::atoi(_lex->cur().lexeme.c_str());
+      //     consume();
+      //     Array_Access *result = new Array_Access(lx, arr_index);
+      //     return result;
+      //   }
+      // }
+    }
   }
   return parse_Ref2(left);
 }
@@ -761,10 +772,6 @@ Parse_Tree *Parser::parse_Arg_List()
   return result;
 }
 
-
-
-
-
 Parse_Tree *Parser::parse_Array_Decl()
 {
   must_be(ARRAY);
@@ -786,4 +793,3 @@ Parse_Tree *Parser::parse_Array_Decl()
 
   return new Array_Declaration(typeToken, bounds, arrayName);
 }
-
