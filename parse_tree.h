@@ -335,9 +335,6 @@ public:
   virtual void print(int indent) const;
 };
 
-
-// Add this to parse_tree.h
-
 class Array_Declaration : public Parse_Tree {
 public:
     Array_Declaration(const Lexer_Token &type, int bound, const Lexer_Token &name);
@@ -353,23 +350,34 @@ private:
 
 class ArrayAssignment : public BinaryOp {
 public:
-
-  // Evaluate the array assignment operation
   virtual EvalResult eval(Ref_Env *env);
   void print(int indent) const override;
 };
 
 class Array_Access : public Parse_Tree {
 public:
-    Array_Access(const Lexer_Token& name_array, Lexer_Token &index);
+    Array_Access(const Lexer_Token& name_array, int index);
+    virtual EvalResult eval(Ref_Env* env) override;
+    void print(int indent) const override;
+
+private:
+    Lexer_Token name_array;
+    int index_;
+};
+
+
+
+class Array_Update : public Parse_Tree {
+public:
+    Array_Update(const Lexer_Token& name_array, Lexer_Token &index, Lexer_Token &update_value);
     virtual EvalResult eval(Ref_Env* env) override;
     void print(int indent) const override;
 
 private:
     Lexer_Token name_array;
     Lexer_Token index_;
+    Lexer_Token update_value_;
 };
-
 
 
 class Array_Size : public Parse_Tree {

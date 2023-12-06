@@ -49,6 +49,7 @@ enum Token {
   SET,
   GET,
   SIZE,
+  UPDATE,
 };
 
 // Tokens as emitted by the lexer
