@@ -369,17 +369,17 @@ public:
   void print(int indent) const override;
 };
 
-class Array_Access : public Parse_Tree
-{
+class Array_Access : public Parse_Tree {
 public:
-  Array_Access(const Lexer_Token &name_array, int index);
-  virtual EvalResult eval(Ref_Env *env) override;
-  void print(int indent) const override;
+    Array_Access(const Lexer_Token& name_array, Lexer_Token &index);
+    virtual EvalResult eval(Ref_Env* env) override;
+    void print(int indent) const override;
 
 private:
-  Lexer_Token name_array;
-  int index_;
+    Lexer_Token name_array;
+    Lexer_Token index_;
 };
+
 
 class Array_Update : public Parse_Tree
 {

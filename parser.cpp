@@ -686,10 +686,9 @@ Parse_Tree *Parser::parse_Ref()
       consume();
       if (has(ID) or has(INTLIT))
       {
-        std::string str =  _lex->cur().lexeme; 
-        int arr_index = std::stoi(str);
+        Lexer_Token arr_index = _lex->cur();
         consume();
-        Array_Access *result = new Array_Access(lx,arr_index);
+        Array_Access *result = new Array_Access(lx, arr_index);
         return result;
       }
 

@@ -1086,32 +1086,33 @@ void ArrayAssignment::print(int indent) const
   std::cout << "Array Assignment" << std::endl;
 }
 
-Array_Access::Array_Access(const Lexer_Token &name_array, int index)
+Array_Access::Array_Access(const Lexer_Token &name_array, Lexer_Token &index)
     : name_array(name_array), index_(index)
 {
-  // Constructor implementation if needed
+    // Constructor implementation if needed
 }
 
 EvalResult Array_Access::eval(Ref_Env *env)
 {
-  // Retrieve the array name
-  std::string arrayName = name_array.lexeme;
+    // Retrieve the array name
+    std::string arrayName = name_array.lexeme;
 
-  // Check if the array variable exists in the environment
-  EvalResult *arrayVar = env->lookup(arrayName);
+    // Check if the array variable exists in the environment
+    EvalResult *arrayVar = env->lookup(arrayName);
 
+    EvalResult *arrayval = env->lookup(index_.lexeme);
 
-    int arr_index = index_;
+    int arr_index = arrayval->as_integer();
 
-  // Check if the arrayVar is an array
-  if (arrayVar->type() != EvalType::VECTOR)
-  {
-    std::cerr << "Error: " << arrayName << " is not an array." << std::endl;
-    return EvalResult(); // Return an undefined result
-  }
+    // Check if the arrayVar is an array
+    if (arrayVar->type() != EvalType::VECTOR)
+    {
+        std::cerr << "Error: " << arrayName << " is not an array." << std::endl;
+        return EvalResult(); // Return an undefined result
+    }
 
-  // Retrieve the vector from EvalResult
-  std::vector<int> arrayValues = arrayVar->as_array();
+    // // Retrieve the vector from EvalResult
+    std::vector<int> arrayValues = arrayVar->as_array();
 
     // // Check if the index is within bounds
     if (arr_index < 0 || arr_index >= arrayValues.size())
@@ -1120,11 +1121,11 @@ EvalResult Array_Access::eval(Ref_Env *env)
         return EvalResult(); // Return an undefined result
     }
 
-  // Create a new EvalResult object and set its value
-  EvalResult result;
-  result.set(arrayValues[arr_index]);
+    // // Create a new EvalResult object and set its value
+    EvalResult result;
+    result.set((arrayValues[arr_index]));
 
-  return result;
+    return result;
 }
 
 void Array_Access::print(int indent) const
