@@ -1102,10 +1102,6 @@ EvalResult Array_Access::eval(Ref_Env *env)
     // Check if the array variable exists in the environment
     EvalResult *arrayVar = env->lookup(arrayName);
 
-    // EvalResult *arrayval = env->lookup(index_.lexeme);
-
-    // int arr_index = arrayval->as_integer();
-
     // Check if the arrayVar is an array
     if (arrayVar->type() != EvalType::VECTOR)
     {
@@ -1113,7 +1109,7 @@ EvalResult Array_Access::eval(Ref_Env *env)
         return EvalResult(); // Return an undefined result
     }
 
-    // // Retrieve the vector from EvalResult
+    // Retrieve the vector from EvalResult
     std::vector<int> arrayValues = arrayVar->as_array();
 
     int arr_index;
@@ -1132,14 +1128,7 @@ EvalResult Array_Access::eval(Ref_Env *env)
         return EvalResult(); // Return an undefined result
     }
 
-    // // Check if the index is within bounds
-    // if (arr_index < 0 || arr_index >= arrayValues.size())
-    // {
-        // std::cerr << "Error: Index out of bounds for array " << arrayName << std::endl;
-        // return EvalResult(); // Return an undefined result
-    // }
-
-    // // Create a new EvalResult object and set its value
+    // Create a new EvalResult object and set its value
     EvalResult result;
     result.set((arrayValues[arr_index]));
 
