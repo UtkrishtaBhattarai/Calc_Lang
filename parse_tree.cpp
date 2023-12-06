@@ -1100,9 +1100,8 @@ EvalResult Array_Access::eval(Ref_Env *env)
   // Check if the array variable exists in the environment
   EvalResult *arrayVar = env->lookup(arrayName);
 
-    EvalResult *arrayval = env->lookup(index_.lexeme);
 
-    int arr_index = arrayval->as_integer();
+    int arr_index = index_;
 
   // Check if the arrayVar is an array
   if (arrayVar->type() != EvalType::VECTOR)
