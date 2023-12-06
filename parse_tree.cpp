@@ -1142,44 +1142,43 @@ Array_Update::Array_Update(const Lexer_Token &name_array, Lexer_Token &index, Le
 
 EvalResult Array_Update::eval(Ref_Env *env)
 {
-  // Retrieve the array name
+    // Retrieve the array name
   std::string arrayName = name_array.lexeme;
 
   // Check if the array variable exists in the environment
   EvalResult *arrayVar = env->lookup(arrayName);
 
-  EvalResult *arrayIndex = env->lookup(index_.lexeme);
-
-
-  std::cout << "arru index" << std::endl;
-
-
-
-  std::cout << arrayIndex-> as_string() << std::endl;
-  // int arrIndex = arrayIndex->as_string();
-
-
-  std::cout << "here?" << std::endl;
-
   // Check if the arrayVar is an array
   if (arrayVar->type() != EvalType::VECTOR)
   {
     std::cerr << "Error: " << arrayName << " is not an array." << std::endl;
-    return EvalResult();
+    return EvalResult(); // Return an undefined result
   }
 
   // Retrieve the vector from EvalResult
-  // std::vector<int> arrayValues = arrayVar->as_array();
+  std::vector<int> arrayValues = arrayVar->as_array();
 
-  // // Check if the index is within bounds
-  // if (arrIndex < 0 || arrIndex >= arrayValues.size())
-  // {
-  //   std::cerr << "Error: Index out of bounds for array " << arrayName << std::endl;
-  //   return EvalResult();
-  // }
+  // Retrieve the index and update value
+  int arr_index = std::stoi(index_.lexeme.c_str());
+  int update_val = std::stoi(update_value_.lexeme.c_str());
 
-  // Update the value at the specified index
-  // arrayValues[arrIndex] = std::stoi(update_value_.lexeme);
+  // Check if the index is within bounds
+  if (arr_index < 0 || arr_index >= arrayValues.size())
+  {
+    std::cerr << "Error: Index out of bounds for array " << arrayName << std::endl;
+    return EvalResult(); // Return an undefined result
+  }
+
+  // Update the array value at the specified index
+  arrayValues[arr_index] = update_val;
+
+  // Update the array in the environment
+  EvalResult updatedArray;
+  updatedArray.set(arrayValues); // Assuming set method is available in your EvalResult class
+  env->set(arrayName, updatedArray);
+
+  return EvalResult();
+
   return EvalResult();
 }
 
