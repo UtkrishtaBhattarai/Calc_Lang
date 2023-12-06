@@ -797,6 +797,11 @@ Parse_Tree *Parser::parse_Array_Decl()
   consume();
   must_be(LBRACKET);
   consume();
+
+  if (has(ID))
+  {
+    std::cout << "Hello world " << std::endl;
+  }
   int bounds = std::stoi(_lex->cur().lexeme);
   consume();
   must_be(RBRACKET);

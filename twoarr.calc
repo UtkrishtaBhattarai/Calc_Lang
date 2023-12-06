@@ -1,11 +1,16 @@
-array of integer with bound [10] arr
+array of int with bound [10] arr
+
+array of int with bound [10] newarr
+
 arr.set 1
 arr.set 2
 arr.set 3
 arr.set 4
 
-temp = 2
 
 
-display arr.get 1
+newarr.set arr.get 0
+
+
+display newarr
 

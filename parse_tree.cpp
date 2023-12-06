@@ -1151,7 +1151,16 @@ EvalResult Array_Update::eval(Ref_Env *env)
 
   EvalResult *arrayIndex = env->lookup(index_.lexeme);
 
-  int arrIndex = arrayIndex->as_integer();
+
+  std::cout << "arru index" << std::endl;
+
+
+
+  std::cout << arrayIndex-> as_string() << std::endl;
+  // int arrIndex = arrayIndex->as_string();
+
+
+  std::cout << "here?" << std::endl;
 
   // Check if the arrayVar is an array
   if (arrayVar->type() != EvalType::VECTOR)
@@ -1161,17 +1170,17 @@ EvalResult Array_Update::eval(Ref_Env *env)
   }
 
   // Retrieve the vector from EvalResult
-  std::vector<int> arrayValues = arrayVar->as_array();
+  // std::vector<int> arrayValues = arrayVar->as_array();
 
-  // Check if the index is within bounds
-  if (arrIndex < 0 || arrIndex >= arrayValues.size())
-  {
-    std::cerr << "Error: Index out of bounds for array " << arrayName << std::endl;
-    return EvalResult();
-  }
+  // // Check if the index is within bounds
+  // if (arrIndex < 0 || arrIndex >= arrayValues.size())
+  // {
+  //   std::cerr << "Error: Index out of bounds for array " << arrayName << std::endl;
+  //   return EvalResult();
+  // }
 
   // Update the value at the specified index
-  arrayValues[arrIndex] = std::stoi(update_value_.lexeme);
+  // arrayValues[arrIndex] = std::stoi(update_value_.lexeme);
   return EvalResult();
 }
 
