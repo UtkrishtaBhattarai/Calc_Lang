@@ -30,7 +30,7 @@ std::ostream &operator<<(std::ostream &os, const Lexer_Token &t) {
         "IF", "WHILE", "NE", "LT", "GT", "LTE", "GTE", "FUN", "COMMA", "CLASS", "STRLIT","ARRAY", "LBRACKET",
   "RBRACKET","OF", 
   "WITH",
-  "BOUNDS","SET","GET", "SIZE", "UPDATE"};
+  "BOUNDS","SET","GET", "SIZE", "UPDATE", "LOAD"};
   return os << token_label[t.tok] << " \"" << t.lexeme << "\" Line: " << t.line
             << " Column " << t.col;
 }
@@ -66,7 +66,7 @@ Lexer_Token Lexer::next() {
   }
   else if(lex_string())
   {
-    //norbg
+    std::cout << "str" << std::endl;
   } else if (lex_number()) {
     // nothing to do
   } else if(lex_fixed()) {
@@ -215,6 +215,7 @@ bool Lexer::lex_kw_or_id() {
   tokens["get"] = GET;
   tokens["size"] = SIZE;
   tokens["update"] = UPDATE;
+  tokens["load"] = LOAD;
 
   // check to see if it starts properly
   if(_cur_char != '_' and not isalpha(_cur_char)){return false;}
@@ -240,8 +241,6 @@ bool Lexer::lex_string()
     return false;
   consume();
   _cur.tok = STRLIT;
-
-  // consume characters until the closing double quote
   while (_cur_char != '\0' && _cur_char != '"')
   {
     consume();

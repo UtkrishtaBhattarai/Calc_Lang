@@ -441,7 +441,7 @@ EvalResult Literal::eval(Ref_Env *env)
   }
   else if (_tok.tok == STRLIT)
   {
-    result.set(_tok.lexeme);
+    result.set(std::string(_tok.lexeme));
   }
   else
   {
@@ -548,32 +548,51 @@ void Display::print(int indent) const
 EvalResult Input::eval(Ref_Env *env)
 {
   EvalResult result;
-  Variable *v = (Variable *)child();
-  double num;
+    Variable *v = static_cast<Variable*>(child());
+    std::string input;
 
-  // print the prompt and get the number
-  std::cout << v->name() << "=";
-  std::cin >> num;
+    // print the prompt and get the input
+    std::cout << v->name() << "=";
 
-  // build the value to the smallest type
-  EvalResult value;
-  if (num - (int)num == 0.0)
-  {
-    value.set((int)num);
-  }
-  else
-  {
-    value.set(num);
-  }
+    // Read the entire line, including spaces
+    std::getline(std::cin, input);
 
-  // bind the variable
-  v->set(env, value);
+    // Check if the input starts and ends with double quotes, treat as string
+    if (input.size() >= 2 && input.front() == '"' && input.back() == '"') {
+        input = input.substr(1, input.size() - 2);  // Remove the double quotes
+        EvalResult value;
+        value.set(input);
+        v->set(env, value);
+    } else {
+        // Check if the input is numeric
+        try {
+            size_t pos;
+            double num = std::stod(input, &pos);
 
-  return result;
+            if (pos == input.size()) {
+                EvalResult value;
+
+                // Check if the numeric value is an integer or has a fractional part
+                if (std::floor(num) == num) {
+                    value.set(static_cast<int>(num));
+                } else {
+                    value.set(num);
+                }
+
+                v->set(env, value);
+            } else {
+                std::cerr << "Invalid numeric input: " << input << std::endl;
+            }
+        } catch (const std::invalid_argument& e) {
+            std::cerr << "Invalid input: " << input << std::endl;
+        }
+    }
+
+    return result;
 }
 
-void Input::print(int indent) const
-{
+
+void Input::print(int indent) const {
   // print myself
   std::cout << std::setw(indent) << "";
   std::cout << "INPUT" << std::endl;

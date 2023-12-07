@@ -1,0 +1,9 @@
+display "Main Menu"
+
+display "1. Employees"
+display "2. Sales"
+display "3. Exit"
+
+input filename
+
+display acme

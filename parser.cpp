@@ -167,6 +167,10 @@ Parse_Tree *Parser::parse_Statement_Body()
   {
     result = parse_Array_Decl();
   }
+  else if(has(LOAD))
+  {
+    result = parse_file_load();
+  }
   else if (not has(NEWLINE))
   {
     result = parse_Expression();
@@ -806,4 +810,16 @@ Parse_Tree *Parser::parse_Array_Decl()
   Lexer_Token arrayName = consume();
 
   return new Array_Declaration(typeToken, bounds, arrayName);
+}
+
+
+
+
+Parse_Tree *Parser::parse_file_load()
+{
+  if(has(LOAD))
+  {
+    consume();
+    std::cout << "Load File Declaration" << std::endl;
+  }
 }
