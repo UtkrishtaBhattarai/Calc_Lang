@@ -524,7 +524,7 @@ EvalResult Display::eval(Ref_Env *env)
   }
   else if (value.type() == VECTOR)
   {
-    std::vector<int, std::allocator<int>> arrayElements = value.as_array();
+    std::vector<int, std::allocator<int> > arrayElements = value.as_array();
 
     std::cout << "[";
     for (const int &element : arrayElements)
@@ -1169,34 +1169,43 @@ EvalResult Array_Update::eval(Ref_Env *env)
   EvalResult var_val = env->get(index_.lexeme);
   EvalResult val_update = env->get(update_value_.lexeme);
 
-
-  if (var_val.type() != UNDEFINED && val_update.type() != UNDEFINED)
-{
+  // Check if the index is a variable
+  if (var_val.type() != UNDEFINED)
+  {
     arr_index = var_val.as_integer();
+  }
+  else
+  {
+    // If the index is not a variable, assume it's a numeric value
+    try
+    {
+      arr_index = std::stoi(index_.lexeme);
+    }
+    catch (const std::invalid_argument &e)
+    {
+      std::cerr << "Error: Invalid index value." << std::endl;
+      return EvalResult(); // Return an undefined result
+    }
+  }
+
+  // Check if the update value is a variable
+  if (val_update.type() != UNDEFINED)
+  {
     update_val = val_update.as_integer();
-}
-
-// Check if update_val is undefined
-else if (val_update.type() != UNDEFINED and val_update.type() == UNDEFINED)
-{
-    arr_index = var_val.as_integer();
-    update_val = std::stoi(update_value_.lexeme.c_str());    
-}
-
-else if(val_update.type() == UNDEFINED and val_update.type() !=UNDEFINED)
-{
-    update_val = val_update.as_integer();
-    arr_index = std::stoi(index_.lexeme.c_str());
-}
-
-else
-{
-    update_val = std::stoi(update_value_.lexeme.c_str());    
-    arr_index = std::stoi(index_.lexeme.c_str());  
-}
-
-
-
+  }
+  else
+  {
+    // If the update value is not a variable, assume it's a numeric value
+    try
+    {
+      update_val = std::stoi(update_value_.lexeme);
+    }
+    catch (const std::invalid_argument &e)
+    {
+      std::cerr << "Error: Invalid update value." << std::endl;
+      return EvalResult(); // Return an undefined result
+    }
+  }
 
   std::vector<int> arrayValues = arrayVar->as_array();
 
