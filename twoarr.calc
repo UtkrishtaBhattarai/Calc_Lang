@@ -8,9 +8,10 @@ arr.set 3
 arr.set 4
 
 
+a = 2
 
-newarr.set arr.get 0
+display arr.get a
 
 
-display newarr
+display arr
 

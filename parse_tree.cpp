@@ -111,13 +111,15 @@ Closure *EvalResult::as_fun()
   return _fun;
 }
 
-std::vector<int> EvalResult::as_array() {
-    if (_type == VECTOR && !_myarray.empty()) {
-        return _myarray;
-    }
-    // Handle the case where the type is not an array or the array is empty
-    // You can return an empty vector or throw an error depending on your design
-    return std::vector<int>();
+std::vector<int> EvalResult::as_array()
+{
+  if (_type == VECTOR && !_myarray.empty())
+  {
+    return _myarray;
+  }
+  // Handle the case where the type is not an array or the array is empty
+  // You can return an empty vector or throw an error depending on your design
+  return std::vector<int>();
 }
 
 // retrieve the type
@@ -1089,43 +1091,52 @@ void ArrayAssignment::print(int indent) const
 Array_Access::Array_Access(const Lexer_Token &name_array, Lexer_Token &index)
     : name_array(name_array), index_(index)
 {
-    // Constructor implementation if needed
+  // Constructor implementation if needed
 }
 
 EvalResult Array_Access::eval(Ref_Env *env)
 {
-    // Retrieve the array name
-    std::string arrayName = name_array.lexeme;
+  // Retrieve the array name
+  std::string arrayName = name_array.lexeme;
 
-    // Check if the array variable exists in the environment
-    EvalResult *arrayVar = env->lookup(arrayName);
+  // Check if the array variable exists in the environment
+  EvalResult *arrayVar = env->lookup(arrayName);
 
-    EvalResult *arrayval = env->lookup(index_.lexeme);
+  EvalResult *arrayval = env->lookup(index_.lexeme);
 
-    int arr_index = arrayval->as_integer();
+  int arr_index = 0;
 
-    // Check if the arrayVar is an array
-    if (arrayVar->type() != EvalType::VECTOR)
-    {
-        std::cerr << "Error: " << arrayName << " is not an array." << std::endl;
-        return EvalResult(); // Return an undefined result
-    }
+  if (!arrayval)
+  {
+    arr_index = std::atoi(index_.lexeme.c_str());
+  }
+  else
+  {
+    arr_index = arrayval->as_integer();
+  }
 
-    // // Retrieve the vector from EvalResult
-    std::vector<int> arrayValues = arrayVar->as_array();
+  // Check if the arrayVar is an array
+  if (arrayVar->type() != EvalType::VECTOR)
+  {
+    std::cerr << "Error: " << arrayName << " is not an array." << std::endl;
+    return EvalResult(); // Return an undefined result
+  }
 
-    // // Check if the index is within bounds
-    if (arr_index < 0 || arr_index >= arrayValues.size())
-    {
-        std::cerr << "Error: Index out of bounds for array " << arrayName << std::endl;
-        return EvalResult(); // Return an undefined result
-    }
+  // // Retrieve the vector from EvalResult
+  std::vector<int> arrayValues = arrayVar->as_array();
 
-    // // Create a new EvalResult object and set its value
-    EvalResult result;
-    result.set((arrayValues[arr_index]));
+  // // Check if the index is within bounds
+  if (arr_index < 0 || arr_index >= arrayValues.size())
+  {
+    std::cerr << "Error: Index out of bounds for array " << arrayName << std::endl;
+    return EvalResult(); // Return an undefined result
+  }
 
-    return result;
+  // // Create a new EvalResult object and set its value
+  EvalResult result;
+  result.set((arrayValues[arr_index]));
+
+  return result;
 }
 
 void Array_Access::print(int indent) const
@@ -1138,28 +1149,25 @@ void Array_Access::print(int indent) const
 Array_Update::Array_Update(const Lexer_Token &name_array, Lexer_Token &index, Lexer_Token &update_value)
     : name_array(name_array), index_(index), update_value_(update_value)
 {
-  // Constructor implementation if needed
 }
 
 EvalResult Array_Update::eval(Ref_Env *env)
 {
-    // Retrieve the array name
   std::string arrayName = name_array.lexeme;
 
-  // Check if the array variable exists in the environment
   EvalResult *arrayVar = env->lookup(arrayName);
 
-  // Check if the arrayVar is an array
   if (arrayVar->type() != EvalType::VECTOR)
   {
     std::cerr << "Error: " << arrayName << " is not an array." << std::endl;
     return EvalResult(); // Return an undefined result
   }
 
-  // Retrieve the vector from EvalResult
   std::vector<int> arrayValues = arrayVar->as_array();
 
-  // Retrieve the index and update value
+
+
+  std::cout << index_.lexeme.c_str() << "\n";
   int arr_index = std::stoi(index_.lexeme.c_str());
   int update_val = std::stoi(update_value_.lexeme.c_str());
 
@@ -1177,8 +1185,6 @@ EvalResult Array_Update::eval(Ref_Env *env)
   EvalResult updatedArray;
   updatedArray.set(arrayValues); // Assuming set method is available in your EvalResult class
   env->set(arrayName, updatedArray);
-
-  return EvalResult();
 
   return EvalResult();
 }

@@ -702,14 +702,16 @@ Parse_Tree *Parser::parse_Ref()
 
     else if (has(UPDATE))
     {
-
       consume();
+      if (has(INTLIT) or has(ID))
+      {
       Lexer_Token arr_index = _lex->cur();
       consume();
       Lexer_Token update_value = _lex->cur();
       consume();
       Array_Update *result = new Array_Update(lx, arr_index, update_value);
       return result;
+      }
     }
   }
   return parse_Ref2(left);

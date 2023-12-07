@@ -1,0 +1,11 @@
+ array of int with bound [10] arr
+ arr.set 1
+ arr.set 3
+ arr.set 9
+ arr.set 13
+ arr.set 90
+ arr.get 0
+ a = 0   
+
+ arr.update a a 
+ 
