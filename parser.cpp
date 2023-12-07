@@ -717,11 +717,7 @@ Parse_Tree *Parser::parse_Ref()
   return parse_Ref2(left);
 }
 
-/*
-< Ref' >         ::= DOT ID < Ref' >
-                     | LPAREN < Arg-List > RPAREN
-                     | ""
- */
+
 Parse_Tree *Parser::parse_Ref2(Parse_Tree *left)
 {
   if (has(DOT))

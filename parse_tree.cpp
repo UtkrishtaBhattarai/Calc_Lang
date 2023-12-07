@@ -1163,13 +1163,42 @@ EvalResult Array_Update::eval(Ref_Env *env)
     return EvalResult(); // Return an undefined result
   }
 
+  int arr_index;
+  int update_val;
+
+  EvalResult var_val = env->get(index_.lexeme);
+  EvalResult val_update = env->get(update_value_.lexeme);
+
+
+  if (var_val.type() != UNDEFINED && val_update.type() != UNDEFINED)
+{
+    arr_index = var_val.as_integer();
+    update_val = val_update.as_integer();
+}
+
+// Check if update_val is undefined
+else if (val_update.type() != UNDEFINED and val_update.type() == UNDEFINED)
+{
+    arr_index = var_val.as_integer();
+    update_val = std::stoi(update_value_.lexeme.c_str());    
+}
+
+else if(val_update.type() == UNDEFINED and val_update.type() !=UNDEFINED)
+{
+    update_val = val_update.as_integer();
+    arr_index = std::stoi(index_.lexeme.c_str());
+}
+
+else
+{
+    update_val = std::stoi(update_value_.lexeme.c_str());    
+    arr_index = std::stoi(index_.lexeme.c_str());  
+}
+
+
+
+
   std::vector<int> arrayValues = arrayVar->as_array();
-
-
-
-  std::cout << index_.lexeme.c_str() << "\n";
-  int arr_index = std::stoi(index_.lexeme.c_str());
-  int update_val = std::stoi(update_value_.lexeme.c_str());
 
   // Check if the index is within bounds
   if (arr_index < 0 || arr_index >= arrayValues.size())

@@ -6,6 +6,8 @@
  arr.set 90
  arr.get 0
  a = 0   
+b = 19
+ arr.update a b
 
- arr.update a a 
- 
+ display arr
+
