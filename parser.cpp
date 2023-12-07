@@ -672,10 +672,13 @@ Parse_Tree *Parser::parse_Ref()
     if (has(SET))
     {
       consume();
-      ArrayAssignment *result = new ArrayAssignment();
-      result->left(left);
-      result->right(parse_Statement3(result));
-      return result;
+      if (has(ID) or has(INTLIT))
+      {
+        ArrayAssignment *result = new ArrayAssignment();
+        result->left(left);
+        result->right(parse_Statement3(result));
+        return result;
+      }
     }
 
     else if (has(GET))
@@ -688,12 +691,25 @@ Parse_Tree *Parser::parse_Ref()
         Array_Access *result = new Array_Access(lx, arr_index);
         return result;
       }
+
     }
-    else if(has(SIZE))
+    else if (has(SIZE))
     {
       consume();
-        Array_Size *result = new Array_Size(lx);
-        return result;
+      Array_Size *result = new Array_Size(lx);
+      return result;
+    }
+
+    else if (has(UPDATE))
+    {
+
+      consume();
+      Lexer_Token arr_index = _lex->cur();
+      consume();
+      Lexer_Token update_value = _lex->cur();
+      consume();
+      Array_Update *result = new Array_Update(lx, arr_index, update_value);
+      return result;
     }
   }
   return parse_Ref2(left);
@@ -780,6 +796,11 @@ Parse_Tree *Parser::parse_Array_Decl()
   consume();
   must_be(LBRACKET);
   consume();
+
+  if (has(ID))
+  {
+    std::cout << "Hello world " << std::endl;
+  }
   int bounds = std::stoi(_lex->cur().lexeme);
   consume();
   must_be(RBRACKET);

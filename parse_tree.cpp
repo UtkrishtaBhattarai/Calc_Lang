@@ -66,6 +66,7 @@ void EvalResult::set(std::vector<int> _myarray)
 // type coercion functions
 int EvalResult::as_integer()
 {
+
   if (_type == INTEGER)
   {
     return _i;
@@ -115,9 +116,9 @@ std::vector<int> EvalResult::as_array() {
         return _myarray;
     }
     // Handle the case where the type is not an array or the array is empty
+    // You can return an empty vector or throw an error depending on your design
     return std::vector<int>();
 }
-
 
 // retrieve the type
 EvalType EvalResult::type() { return _type; }
@@ -519,17 +520,17 @@ EvalResult Display::eval(Ref_Env *env)
   {
     std::cout << value.as_real() << std::endl;
   }
-else if (value.type() == VECTOR)
-{
+  else if (value.type() == VECTOR)
+  {
     std::vector<int, std::allocator<int>> arrayElements = value.as_array();
 
     std::cout << "[";
-    for (const int& element : arrayElements)
+    for (const int &element : arrayElements)
     {
-        std::cout << element << ",";
+      std::cout << element << ",";
     }
     std::cout << "]" << std::endl;
-}
+  }
   return result;
 }
 
@@ -1008,24 +1009,22 @@ Array_Declaration::Array_Declaration(const Lexer_Token &type, int bound, const L
 EvalResult Array_Declaration::eval(Ref_Env *env)
 {
 
-  
   std::string ref_type = type_.lexeme; // Assuming type_ is a Lexer_Token
   int bounds = bound_;                 // Assuming bound_ is an integer
   std::string name = name_.lexeme;     // Assuming name_ is a Lexer_Token
 
-  // Construct the array values (e.g., initialize with zeros)
   std::vector<int> arrayValues;
 
-  if (env->lookup(name)) {
+  if (env->lookup(name))
+  {
     std::cerr << "Same array is already defined";
     return EvalResult();
-}
+  }
   EvalResult result;
   result.set(arrayValues);
 
   // Assign the array to the environment
   env->set(name, result);
-
 
   return EvalResult(); // Return some result if needed
 }
@@ -1049,20 +1048,19 @@ void Array_Declaration::print(int indent) const
 
 EvalResult ArrayAssignment::eval(Ref_Env *env)
 {
-EvalResult result;
+  EvalResult result;
 
-// Retrieve the array name from the left side of the assignment
-Variable *arrayVariable = dynamic_cast<Variable *>(left());
-if (arrayVariable)
-{
-    // Check if it's an array
+  // Retrieve the array name from the left side of the assignment
+  Variable *arrayVariable = dynamic_cast<Variable *>(left());
+  if (arrayVariable)
+  {
     EvalResult arrayResult = arrayVariable->eval(env);
 
     // Check if the arrayVar is an array
     if (arrayResult.type() != EvalType::VECTOR)
     {
-        std::cerr << "Error: " << arrayVariable->name() << " is not an array." << std::endl;
-        return EvalResult(); // Return an undefined result
+      std::cerr << "Error: " << arrayVariable->name() << " is not an array." << std::endl;
+      return EvalResult(); // Return an undefined result
     }
     // Get the array name
     std::string arrayName = arrayVariable->name();
@@ -1075,10 +1073,10 @@ if (arrayVariable)
 
     // Update the array in the environment
     EvalResult updatedArray;
-    updatedArray.set(arrayValues);  // Assuming set method is available in your EvalResult class
+    updatedArray.set(arrayValues); // Assuming set method is available in your EvalResult class
     env->set(arrayName, updatedArray);
-}
-return result;
+  }
+  return result;
 }
 
 void ArrayAssignment::print(int indent) const
@@ -1112,19 +1110,10 @@ EvalResult Array_Access::eval(Ref_Env *env)
     // Retrieve the vector from EvalResult
     std::vector<int> arrayValues = arrayVar->as_array();
 
-    int arr_index;
-    try
+    // // Check if the index is within bounds
+    if (arr_index < 0 || arr_index >= arrayValues.size())
     {
-        arr_index = std::stoi(index_.lexeme);
-    }
-    catch (const std::invalid_argument &e)
-    {
-        std::cerr << "Error: Invalid index for array " << arrayName << std::endl;
-        return EvalResult(); // Return an undefined result
-    }
-    catch (const std::out_of_range &e)
-    {
-        std::cerr << "Error: Index out of range for array " << arrayName << std::endl;
+        std::cerr << "Error: Index out of bounds for array " << arrayName << std::endl;
         return EvalResult(); // Return an undefined result
     }
 
@@ -1142,37 +1131,90 @@ void Array_Access::print(int indent) const
   std::cout << "Array Assignment" << std::endl;
 }
 
+Array_Update::Array_Update(const Lexer_Token &name_array, Lexer_Token &index, Lexer_Token &update_value)
+    : name_array(name_array), index_(index), update_value_(update_value)
+{
+  // Constructor implementation if needed
+}
+
+EvalResult Array_Update::eval(Ref_Env *env)
+{
+    // Retrieve the array name
+  std::string arrayName = name_array.lexeme;
+
+  // Check if the array variable exists in the environment
+  EvalResult *arrayVar = env->lookup(arrayName);
+
+  // Check if the arrayVar is an array
+  if (arrayVar->type() != EvalType::VECTOR)
+  {
+    std::cerr << "Error: " << arrayName << " is not an array." << std::endl;
+    return EvalResult(); // Return an undefined result
+  }
+
+  // Retrieve the vector from EvalResult
+  std::vector<int> arrayValues = arrayVar->as_array();
+
+  // Retrieve the index and update value
+  int arr_index = std::stoi(index_.lexeme.c_str());
+  int update_val = std::stoi(update_value_.lexeme.c_str());
+
+  // Check if the index is within bounds
+  if (arr_index < 0 || arr_index >= arrayValues.size())
+  {
+    std::cerr << "Error: Index out of bounds for array " << arrayName << std::endl;
+    return EvalResult(); // Return an undefined result
+  }
+
+  // Update the array value at the specified index
+  arrayValues[arr_index] = update_val;
+
+  // Update the array in the environment
+  EvalResult updatedArray;
+  updatedArray.set(arrayValues); // Assuming set method is available in your EvalResult class
+  env->set(arrayName, updatedArray);
+
+  return EvalResult();
+
+  return EvalResult();
+}
+
+void Array_Update::print(int indent) const
+{
+  // Print the array declaration
+  std::cout << std::setw(indent) << "";
+  std::cout << "Array Updated" << std::endl;
+}
+
 Array_Size::Array_Size(const Lexer_Token &name_array)
     : name_array(name_array)
 {
-    // Constructor implementation if needed
+  // Constructor implementation if needed
 }
 
 EvalResult Array_Size::eval(Ref_Env *env)
 {
-    // Retrieve the array name
-    std::string arrayName = name_array.lexeme;
+  // Retrieve the array name
+  std::string arrayName = name_array.lexeme;
 
-    // Check if the array variable exists in the environment
-    EvalResult *arrayVar = env->lookup(arrayName);
+  // Check if the array variable exists in the environment
+  EvalResult *arrayVar = env->lookup(arrayName);
 
+  // Check if the arrayVar is an array
+  if (arrayVar->type() != EvalType::VECTOR)
+  {
+    std::cerr << "Error: " << arrayName << " is not an array." << std::endl;
+    return EvalResult(); // Return an undefined result
+  }
 
-    // Check if the arrayVar is an array
-    if (arrayVar->type() != EvalType::VECTOR)
-    {
-        std::cerr << "Error: " << arrayName << " is not an array." << std::endl;
-        return EvalResult(); // Return an undefined result
-    }
+  // // Retrieve the vector from EvalResult
+  std::vector<int> arrayValues = arrayVar->as_array();
+  int arr_size = (int)arrayValues.size();
 
-    // // Retrieve the vector from EvalResult
-    std::vector<int> arrayValues = arrayVar->as_array();
-    int arr_size = (int) arrayValues.size();
-
-  
-    // // Create a new EvalResult object and set its value
-    EvalResult result;
-    result.set(arr_size);
-    return result;
+  // // Create a new EvalResult object and set its value
+  EvalResult result;
+  result.set(arr_size);
+  return result;
 }
 
 void Array_Size::print(int indent) const

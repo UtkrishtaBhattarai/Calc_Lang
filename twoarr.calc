@@ -1,12 +1,16 @@
-array of str with bound [10] arr
-array of int with bound [5] bekaar
+array of int with bound [10] arr
 
+array of int with bound [10] newarr
 
+arr.set 1
 arr.set 2
-bekaar.set 4
+arr.set 3
+arr.set 4
 
 
-x = arr.get 0
-y = bekaar.get 0
 
-display y + x
+newarr.set arr.get 0
+
+
+display newarr
+

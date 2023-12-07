@@ -3,3 +3,4 @@ ARRAYS
 # set arrays values by "array_name.set value
 # get arrays values by "array_name.get index
 # get array size by "array_name.size"
+# display whole array contents by just "display array_name"
