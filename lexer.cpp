@@ -30,7 +30,7 @@ std::ostream &operator<<(std::ostream &os, const Lexer_Token &t) {
         "IF", "WHILE", "NE", "LT", "GT", "LTE", "GTE", "FUN", "COMMA", "CLASS", "STRLIT","ARRAY", "LBRACKET",
   "RBRACKET","OF", 
   "WITH",
-  "BOUNDS","SET","GET", "SIZE", "UPDATE", "LOAD"};
+  "BOUNDS","SET","GET", "SIZE", "UPDATE", "LOAD", "FETCH"};
   return os << token_label[t.tok] << " \"" << t.lexeme << "\" Line: " << t.line
             << " Column " << t.col;
 }
@@ -66,7 +66,6 @@ Lexer_Token Lexer::next() {
   }
   else if(lex_string())
   {
-    std::cout << "str" << std::endl;
   } else if (lex_number()) {
     // nothing to do
   } else if(lex_fixed()) {
@@ -216,6 +215,7 @@ bool Lexer::lex_kw_or_id() {
   tokens["size"] = SIZE;
   tokens["update"] = UPDATE;
   tokens["load"] = LOAD;
+  tokens["fetch"] = FETCH;
 
   // check to see if it starts properly
   if(_cur_char != '_' and not isalpha(_cur_char)){return false;}

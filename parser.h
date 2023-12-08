@@ -62,5 +62,6 @@ private:
   Parse_Tree* parse_Arg_List();
   Parse_Tree* parse_Array_Decl();
   Parse_Tree* parse_file_load();
+  Parse_Tree* parse_fetch_file();
   
 };

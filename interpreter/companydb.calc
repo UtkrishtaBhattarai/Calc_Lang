@@ -1,9 +1,37 @@
 display "Main Menu"
 
-display "1. Employees"
-display "2. Sales"
-display "3. Exit"
+filename = "acme.dat"
+var =1
+emp_loop = 1
 
-input filename
+while var = 1
+    display "1. Employees"
+    display "2. Sales"
+    display "3. Exit"
+    emp_loop = 1
+    input user_choice
+    while emp_loop = 1
+    if user_choice = 1
+        load filename
+        display "(1) to add an employee and (2) to return to Main Menu"
+        input emp_cho
+        if emp_cho = 1
+            input Name
+            input Email
+            input Phone
+            input Salary
+        end if 
+        if emp_cho = 2
+        emp_loop = emp_loop + 1
+            display "Exiting Employee"
+        end if
+    end if
+    end while
 
-display acme
+
+
+
+end while
+
+
+

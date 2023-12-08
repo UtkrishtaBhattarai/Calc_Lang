@@ -6,6 +6,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
 
 // Closure Constructor
 Closure::Closure(Fun_Def *fun, Ref_Env *env)
@@ -524,7 +525,7 @@ EvalResult Display::eval(Ref_Env *env)
   }
   else if (value.type() == VECTOR)
   {
-    std::vector<int, std::allocator<int> > arrayElements = value.as_array();
+    std::vector<int, std::allocator<int>> arrayElements = value.as_array();
 
     std::cout << "[";
     for (const int &element : arrayElements)
@@ -548,51 +549,63 @@ void Display::print(int indent) const
 EvalResult Input::eval(Ref_Env *env)
 {
   EvalResult result;
-    Variable *v = static_cast<Variable*>(child());
-    std::string input;
+  Variable *v = static_cast<Variable *>(child());
+  std::string input;
 
-    // print the prompt and get the input
-    std::cout << v->name() << "=";
+  // print the prompt and get the input
+  std::cout << v->name() << "=";
 
-    // Read the entire line, including spaces
-    std::getline(std::cin, input);
+  // Read the entire line, including spaces
+  std::getline(std::cin, input);
 
-    // Check if the input starts and ends with double quotes, treat as string
-    if (input.size() >= 2 && input.front() == '"' && input.back() == '"') {
-        input = input.substr(1, input.size() - 2);  // Remove the double quotes
+  // Check if the input starts and ends with double quotes, treat as string
+  if (input.size() >= 2 && input.front() == '"' && input.back() == '"')
+  {
+    input = input.substr(1, input.size() - 2); // Remove the double quotes
+    EvalResult value;
+    value.set(input);
+    v->set(env, value);
+  }
+  else
+  {
+    // Check if the input is numeric
+    try
+    {
+      size_t pos;
+      double num = std::stod(input, &pos);
+
+      if (pos == input.size())
+      {
         EvalResult value;
-        value.set(input);
-        v->set(env, value);
-    } else {
-        // Check if the input is numeric
-        try {
-            size_t pos;
-            double num = std::stod(input, &pos);
 
-            if (pos == input.size()) {
-                EvalResult value;
-
-                // Check if the numeric value is an integer or has a fractional part
-                if (std::floor(num) == num) {
-                    value.set(static_cast<int>(num));
-                } else {
-                    value.set(num);
-                }
-
-                v->set(env, value);
-            } else {
-                std::cerr << "Invalid numeric input: " << input << std::endl;
-            }
-        } catch (const std::invalid_argument& e) {
-            std::cerr << "Invalid input: " << input << std::endl;
+        // Check if the numeric value is an integer or has a fractional part
+        if (std::floor(num) == num)
+        {
+          value.set(static_cast<int>(num));
         }
-    }
+        else
+        {
+          value.set(num);
+        }
 
-    return result;
+        v->set(env, value);
+      }
+      else
+      {
+        std::cerr << "Invalid numeric input: " << input << std::endl;
+      }
+    }
+    catch (const std::invalid_argument &e)
+    {
+      std::cerr << "Invalid input: " << input << std::endl;
+    }
+  }
+
+  return result;
 }
 
-
-void Input::print(int indent) const {
+void Input::print(int indent) const
+{
   // print myself
   std::cout << std::setw(indent) << "";
   std::cout << "INPUT" << std::endl;
@@ -1289,4 +1302,78 @@ void Array_Size::print(int indent) const
   // Print the array declaration
   std::cout << std::setw(indent) << "";
   std::cout << "Array Assignment" << std::endl;
+}
+
+Load_File::Load_File(const Lexer_Token &name_array)
+    : name_array(name_array)
+{
+  // Constructor implementation if needed
+}
+
+struct Employee
+{
+  std::string name;
+  std::string email;
+  std::string phone;
+  double salary;
+};
+
+EvalResult Load_File::eval(Ref_Env *env)
+{
+
+  EvalResult var_val = env->get(name_array.lexeme);
+  std::string filename = var_val.as_string();
+  std::fstream file(filename, std::ios::in | std::ios::out | std::ios::app);
+
+  if (file.is_open())
+  {
+
+    int numEmployees;
+    file >> numEmployees;
+
+    std::vector<Employee> employees;
+
+    for (int i = 0; i < numEmployees; ++i)
+    {
+      Employee emp;
+      file.ignore(); // Ignore the newline character after the number of employees
+      std::getline(file, emp.name);
+      std::getline(file, emp.email);
+      std::getline(file, emp.phone);
+      file >> emp.salary;
+      employees.push_back(emp);
+    }
+
+    // Displaying the loaded employee data
+    std::cout << "Employees:" << std::endl;
+    for (const auto &emp : employees)
+    {
+      std::cout << "Name: " << emp.name << "< " << emp.email << ">"
+                << ", Phone: " << emp.phone << ", Salary: $" << emp.salary << std::endl;
+    }
+  }
+  else
+  {
+    // File doesn't exist, so create it with default values (0 0)
+    std::ofstream outfile(filename);
+
+    if (outfile.is_open())
+    {
+      outfile << 0 << std::endl;
+      std::cout << "File created successfully with default values (0 0)." << std::endl;
+    }
+    else
+    {
+      std::cerr << "Error creating the file." << std::endl;
+      return EvalResult(); // Return an error code
+    }
+  }
+  return EvalResult(); // Return 0 to indicate success
+}
+
+void Load_File::print(int indent) const
+{
+  // Print the array declaration
+  std::cout << std::setw(indent) << "";
+  std::cout << "File Load" << std::endl;
 }

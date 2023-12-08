@@ -51,6 +51,7 @@ enum Token {
   SIZE,
   UPDATE,
   LOAD,
+  FETCH,
 };
 
 // Tokens as emitted by the lexer

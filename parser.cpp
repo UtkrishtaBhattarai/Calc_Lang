@@ -820,6 +820,8 @@ Parse_Tree *Parser::parse_file_load()
   if(has(LOAD))
   {
     consume();
-    std::cout << "Load File Declaration" << std::endl;
-  }
+    Lexer_Token file_name = _lex->cur();
+    consume();
+    return new Load_File(file_name);
+    }
 }
