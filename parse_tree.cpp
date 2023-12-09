@@ -525,7 +525,7 @@ EvalResult Display::eval(Ref_Env *env)
   }
   else if (value.type() == VECTOR)
   {
-    std::vector<int, std::allocator<int>> arrayElements = value.as_array();
+    std::vector<int, std::allocator<int> > arrayElements = value.as_array();
 
     std::cout << "[";
     for (const int &element : arrayElements)
@@ -1320,56 +1320,55 @@ struct Employee
 
 EvalResult Load_File::eval(Ref_Env *env)
 {
-
   EvalResult var_val = env->get(name_array.lexeme);
   std::string filename = var_val.as_string();
-  std::fstream file(filename, std::ios::in | std::ios::out | std::ios::app);
+  std::fstream file(filename, std::ios::in);
 
-  if (file.is_open())
+  if (!file.is_open())
   {
-
-    int numEmployees;
-    file >> numEmployees;
-
-    std::vector<Employee> employees;
-
-    for (int i = 0; i < numEmployees; ++i)
-    {
-      Employee emp;
-      file.ignore(); // Ignore the newline character after the number of employees
-      std::getline(file, emp.name);
-      std::getline(file, emp.email);
-      std::getline(file, emp.phone);
-      file >> emp.salary;
-      employees.push_back(emp);
-    }
-
-    // Displaying the loaded employee data
-    std::cout << "Employees:" << std::endl;
-    for (const auto &emp : employees)
-    {
-      std::cout << "Name: " << emp.name << "< " << emp.email << ">"
-                << ", Phone: " << emp.phone << ", Salary: $" << emp.salary << std::endl;
-    }
+    std::cerr << "Error opening the file for reading." << std::endl;
+    return EvalResult(); // Return an error code
   }
-  else
+
+  int numEmployees = 0;
+  file >> numEmployees;
+
+  if (file.fail())
   {
-    // File doesn't exist, so create it with default values (0 0)
-    std::ofstream outfile(filename);
+    std::cerr << "Error reading the number of employees from the file." << std::endl;
 
-    if (outfile.is_open())
-    {
-      outfile << 0 << std::endl;
-      std::cout << "File created successfully with default values (0 0)." << std::endl;
-    }
-    else
-    {
-      std::cerr << "Error creating the file." << std::endl;
-      return EvalResult(); // Return an error code
-    }
+    std::cerr << std::endl;
+
+    return EvalResult(); // Return an error code
   }
+
+  std::cout << "Number of employees: " << numEmployees << std::endl;
+
+  // Now directly read employee data without using file.ignore()
+  std::vector<Employee> employees;
+  for (int i = 0; i < numEmployees; ++i)
+  {
+    Employee emp;
+    // Assuming each employee's data is spread across multiple lines
+    file.ignore(); // Ignore the newline character after the number of employees
+    std::getline(file, emp.name);
+    std::getline(file, emp.email);
+    std::getline(file, emp.phone);
+    file >> emp.salary;
+    employees.push_back(emp);
+  }
+
+  // Displaying the loaded employee data
+  std::cout << "Employees:" << std::endl;
+  for (const auto &emp : employees)
+  {
+    std::cout << "Name: " << emp.name << " <" << emp.email << ">"
+              << ", Phone: " << emp.phone << ", Salary: $" << emp.salary << std::endl;
+  }
+
   return EvalResult(); // Return 0 to indicate success
 }
+
 
 void Load_File::print(int indent) const
 {
