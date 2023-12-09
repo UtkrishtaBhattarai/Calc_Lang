@@ -1425,6 +1425,9 @@ EvalResult Load_File::eval(Ref_Env *env)
       int cust_num = cust_eval.as_integer();
 
       const Customer &selectedCustomer = customers[cust_num - 1];
+
+      std::cout << "Name: " << selectedCustomer.name << ", Email: " << selectedCustomer.email << ", Phone: " << selectedCustomer.phone << std::endl;
+
       std::cout << "Purchases for " << selectedCustomer.name << ":" << std::endl;
 
       for (const auto &purchase : selectedCustomer.purchases)
