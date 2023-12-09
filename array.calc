@@ -1,8 +1,13 @@
 array of string with bound [2] my_arr
 
-my_arr.set "1"
-my_arr.set "2"
+my_arr.set 1
+my_arr.set 2
 
-id = 0
-y = my_arr.get id 
-display y
+a = 10
+
+array of string with bound [a] my_arr1
+my_arr1.set 1
+my_arr1.set 2
+my_arr1.set 3
+display my_arr1.size
+

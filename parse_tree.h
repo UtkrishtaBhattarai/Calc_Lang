@@ -420,6 +420,20 @@ private:
   std::string customer_number;
 };
 
+class Write_File : public Parse_Tree
+{
+public:
+    Write_File(const Lexer_Token &name_array, const std::string &write_type, const std::string &customer_number, const std::vector<Lexer_Token> &variables);
+    virtual EvalResult eval(Ref_Env *env) override;
+    void print(int indent) const override;
+
+private:
+    Lexer_Token name_array;
+    std::string write_type;
+    std::string customer_number;
+    std::vector<Lexer_Token> variables;
+};
+
 
 
 
