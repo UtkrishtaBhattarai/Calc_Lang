@@ -56,6 +56,7 @@ enum Token {
   CUSTOMER,
   CUSTOMER_PURCHASE,
   WRITE,
+  CLOSE,
 };
 
 // Tokens as emitted by the lexer

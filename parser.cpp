@@ -167,13 +167,17 @@ Parse_Tree *Parser::parse_Statement_Body()
   {
     result = parse_Array_Decl();
   }
-  else if(has(LOAD))
+  else if (has(LOAD))
   {
-      result = parse_file_load();
+    result = parse_file_load();
   }
   else if (has(WRITE))
   {
-      result = parse_File_Write();
+    result = parse_File_Write();
+  }
+  else if (has(CLOSE))
+  {
+    result = close_file();
   }
   else if (not has(NEWLINE))
   {
@@ -699,7 +703,6 @@ Parse_Tree *Parser::parse_Ref()
         Array_Access *result = new Array_Access(lx, arr_index);
         return result;
       }
-
     }
     else if (has(SIZE))
     {
@@ -713,18 +716,17 @@ Parse_Tree *Parser::parse_Ref()
       consume();
       if (has(INTLIT) or has(ID))
       {
-      Lexer_Token arr_index = _lex->cur();
-      consume();
-      Lexer_Token update_value = _lex->cur();
-      consume();
-      Array_Update *result = new Array_Update(lx, arr_index, update_value);
-      return result;
+        Lexer_Token arr_index = _lex->cur();
+        consume();
+        Lexer_Token update_value = _lex->cur();
+        consume();
+        Array_Update *result = new Array_Update(lx, arr_index, update_value);
+        return result;
       }
     }
   }
   return parse_Ref2(left);
 }
-
 
 Parse_Tree *Parser::parse_Ref2(Parse_Tree *left)
 {
@@ -811,52 +813,54 @@ Parse_Tree *Parser::parse_Array_Decl()
   return new Array_Declaration(typeToken, array_bound, arrayName);
 }
 
-
-
-
 Parse_Tree *Parser::parse_file_load()
 {
-  if(has(LOAD))
+  must_be(LOAD);
+  consume();
+  Lexer_Token file_name = _lex->cur();
+  consume();
+  std::string load_what = _lex->cur().lexeme.c_str();
+  consume();
+  std::string customer_number = "";
+  if (load_what == "customer_purchase")
   {
+    customer_number = _lex->cur().lexeme.c_str();
     consume();
-    Lexer_Token file_name = _lex->cur();
-    consume();
-    std::string load_what = _lex->cur().lexeme.c_str();
-    consume();
-    std::string customer_number = "";    
-    if (load_what == "customer_purchase")
-    {  
-      customer_number = _lex->cur().lexeme.c_str();
-      consume();
-    }
-    return new Load_File(file_name,load_what, customer_number) ;
-    }
+  }
+  return new Load_File(file_name, load_what, customer_number);
 }
 
 Parse_Tree *Parser::parse_File_Write()
 {
-    if (has(WRITE))
-    {
-        //todo customerWrite
-        consume();
-        Lexer_Token file_name = _lex->cur();
-        consume();
-        std::string write_type = _lex->cur().lexeme.c_str();
-        consume();
-        std::string customer_number = "";
-        if (write_type == "customer_purchase")
-        {
-            customer_number = _lex->cur().lexeme.c_str();
-            consume();
-        }
-        // Parse a list of variables
-        std::vector<Lexer_Token> variables;
-        while (has(ID)) // Assuming IDENTIFIER is the token type for variables
-        {
-            variables.push_back(_lex->cur());
-            consume();
+  must_be(WRITE);
+  // todo customerWrite
+  consume();
+  Lexer_Token file_name = _lex->cur();
+  consume();
+  std::string write_type = _lex->cur().lexeme.c_str();
+  consume();
+  std::string customer_number = "";
+  if (write_type == "customer_purchase")
+  {
+    customer_number = _lex->cur().lexeme.c_str();
+    consume();
+  }
+  // Parse a list of variables
+  std::vector<Lexer_Token> variables;
+  while (has(ID)) // Assuming IDENTIFIER is the token type for variables
+  {
+    variables.push_back(_lex->cur());
+    consume();
+  }
+  return new Write_File(file_name, write_type, customer_number, variables);
+}
 
-        }
-        return new Write_File(file_name, write_type, customer_number, variables);
-    }
+
+Parse_Tree *Parser::close_file()
+{
+  must_be(CLOSE);
+  consume();
+  Lexer_Token file_name = _lex->cur();
+  consume();
+  return new Close_File(file_name);
 }

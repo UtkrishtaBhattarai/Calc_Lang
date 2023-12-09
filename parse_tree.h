@@ -436,5 +436,17 @@ private:
 
 
 
+class Close_File : public Parse_Tree
+{
+public:
+  Close_File(const Lexer_Token &file_name);
+  virtual EvalResult eval(Ref_Env *env) override;
+  void print(int indent) const override;
+
+private:
+  Lexer_Token file_name;
+};
+
+
 
 #endif

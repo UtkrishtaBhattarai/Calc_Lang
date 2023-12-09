@@ -64,6 +64,12 @@ while var = 1
     end while
     
     end if
+
+    if user_choice = 3
+        display "Exiting From System"
+        display "Change Saved to the File"
+        close filename
+    end if
     end while
 end while
 
