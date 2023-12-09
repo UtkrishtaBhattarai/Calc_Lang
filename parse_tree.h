@@ -352,13 +352,13 @@ public:
 class Array_Declaration : public Parse_Tree
 {
 public:
-  Array_Declaration(const Lexer_Token &type, int bound, const Lexer_Token &name);
+  Array_Declaration(const Lexer_Token &type, const Lexer_Token &bound, const Lexer_Token &name);
   EvalResult eval(Ref_Env *env) override;
   void print(int indent) const override;
 
 private:
   Lexer_Token type_;
-  int bound_;
+  Lexer_Token bound_;
   Lexer_Token name_;
 };
 

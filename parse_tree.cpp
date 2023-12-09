@@ -525,7 +525,7 @@ EvalResult Display::eval(Ref_Env *env)
   }
   else if (value.type() == VECTOR)
   {
-    std::vector<int, std::allocator<int>> arrayElements = value.as_array();
+    std::vector<int, std::allocator<int> > arrayElements = value.as_array();
 
     std::cout << "[";
     for (const int &element : arrayElements)
@@ -1036,22 +1036,46 @@ void Fun_Call::print(int indent) const
   left()->print(indent + 1);
   right()->print(indent + 1);
 }
-
-Array_Declaration::Array_Declaration(const Lexer_Token &type, int bound, const Lexer_Token &name)
+Array_Declaration::Array_Declaration(const Lexer_Token &type, const Lexer_Token &bound, const Lexer_Token &name)
     : type_(type), bound_(bound), name_(name) {}
 
 EvalResult Array_Declaration::eval(Ref_Env *env)
 {
-
   std::string ref_type = type_.lexeme; // Assuming type_ is a Lexer_Token
-  int bounds = bound_;                 // Assuming bound_ is an integer
   std::string name = name_.lexeme;     // Assuming name_ is a Lexer_Token
+
+  int bounds = 0;
+
+  if (bound_.tok == INTLIT)
+  {
+    bounds = std::stoi(bound_.lexeme); // If it's an integer literal, use its value
+  }
+  else if (bound_.tok == ID)
+  {
+    // If it's an identifier, look up its value in the environment
+    EvalResult boundResult = env->get(bound_.lexeme);
+    if (boundResult.as_integer())
+    {
+      bounds = boundResult.as_integer();
+    }
+    else
+    {
+      std::cerr << "Error: The array bounds should be an integer or a variable representing an integer." << std::endl;
+      return EvalResult(); // Return an error result or throw an exception
+    }
+  }
+  else
+  {
+    std::cerr << "Error: Unexpected type for array bounds." << std::endl;
+    return EvalResult(); // Return an error result or throw an exception
+  }
 
   std::vector<int> arrayValues;
 
+
   if (env->lookup(name))
   {
-    std::cerr << "Same array is already defined";
+    std::cerr << "Error: Array '" << name << "' is already defined." << std::endl;
     return EvalResult();
   }
   EvalResult result;
@@ -1339,108 +1363,121 @@ Purchase purchase;
 
 EvalResult Load_File::eval(Ref_Env *env)
 {
+    employees.clear();
+    customers.clear();
 
-  employees.clear();
-  customers.clear();
+    EvalResult var_val = env->get(name_array.lexeme);
+    std::string load_type = load_what;
+    std::string filename = var_val.as_string();
+    std::cout << "Opening file: " << filename << std::endl;
+    std::fstream infile(filename, std::ios::in);
 
-  EvalResult var_val = env->get(name_array.lexeme);
-  std::string load_type = load_what;
-  std::string filename = var_val.as_string();
-  std::fstream infile(filename, std::ios::in | std::ios::out | std::ios::app);
 
-  if (!infile.is_open())
-  {
-    std::cerr << "Error opening the file." << std::endl;
-    return EvalResult();
-  }
-
-  int numEmployees;
-  infile >> numEmployees;
-  infile.ignore();
-
-  for (int i = 0; i < numEmployees; ++i)
-  {
-    Employee emp;
-    std::getline(infile, emp.name);
-    std::getline(infile, emp.email);
-    std::getline(infile, emp.phone);
-    infile >> emp.salary;
-    infile.ignore();
-    employees.push_back(emp);
-  }
-
-  int numCustomers;
-  infile >> numCustomers;
-  infile.ignore();
-
-  for (int i = 0; i < numCustomers; ++i)
-  {
-    Customer cust;
-    infile >> cust.name;
-    infile.ignore();
-    std::getline(infile, cust.email);
-    std::getline(infile, cust.phone);
-
-    int numPurchases;
-    infile >> numPurchases;
-    infile.ignore();
-
-    for (int j = 0; j < numPurchases; ++j)
+    if (!infile.is_open())
     {
-      std::getline(infile, purchase.itemName);
-      infile >> purchase.price >> purchase.quantity;
-      infile.ignore();
-      cust.purchases.push_back(purchase);
+        std::cerr << "Error opening the file." << std::endl;
+        return EvalResult();
     }
 
-    customers.push_back(cust);
-  }
+    int numEmployees = 0;
+    infile >> numEmployees;
+    std::cout << "Read numEmployees: " << numEmployees << std::endl;
 
-  if (load_what == "employee")
-  {
-    std::cout << "Employees:" << std::endl;
-    for (const auto &emp : employees)
+    if (infile.fail())
     {
-      std::cout << "Name: " << emp.name << ", Email: " << emp.email << ", Phone: " << emp.phone << ", Salary: $" << emp.salary << std::endl;
+        std::cerr << "Error reading the data." << std::endl;
+        return EvalResult(); // Return an error code
     }
-  }
 
-  else if (load_what == "customer")
-  {
-    std::cout << "\nCustomers:" << std::endl;
-    for (size_t i = 0; i < customers.size(); ++i)
+    infile.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignore the newline character after numEmployees
+
+    // Now directly read employee data without using file.ignore()
+    employees.clear(); // Clear the global vector before populating it
+    for (int i = 0; i < numEmployees; ++i)
     {
-      std::cout << i + 1 << "." << customers[i].name << std::endl;
+        Employee emp;
+        infile.ignore(); // Ignore the newline character after the number of employees
+        std::getline(infile, emp.name);
+        std::getline(infile, emp.email);
+        std::getline(infile, emp.phone);
+        infile >> emp.salary;
+        employees.push_back(emp);
     }
-  }
-  else if (load_what == "customer_purchase")
-  {
-    if (customer_number == "")
+
+    int numCustomers = 0;
+    infile >> numCustomers;
+    infile.ignore(); // Ignore the newline character after numCustomers
+
+    for (int i = 0; i < numCustomers; ++i)
     {
-      std::cerr << "Hey Invalid Input" << std::endl;
+        Customer cust;
+        infile >> cust.name;
+        infile.ignore(); // Ignore the newline character after reading cust.name
+        std::getline(infile, cust.email);
+        std::getline(infile, cust.phone);
+
+        int numPurchases;
+        infile >> numPurchases;
+        infile.ignore(); // Ignore the newline character after numPurchases
+
+        for (int j = 0; j < numPurchases; ++j)
+        {
+            Purchase purchase;
+            std::getline(infile, purchase.itemName);
+            infile >> purchase.price >> purchase.quantity;
+            infile.ignore(); // Ignore the newline character after reading purchase.quantity
+            cust.purchases.push_back(purchase);
+        }
+
+        customers.push_back(cust);
     }
-    else
+
+    if (load_what == "employee")
     {
-      EvalResult cust_eval = env->get(customer_number);
-      int cust_num = cust_eval.as_integer();
-
-      const Customer &selectedCustomer = customers[cust_num - 1];
-
-      std::cout << "Name: " << selectedCustomer.name << ", Email: " << selectedCustomer.email << ", Phone: " << selectedCustomer.phone << std::endl;
-
-      std::cout << "Purchases for " << selectedCustomer.name << ":" << std::endl;
-
-      for (const auto &purchase : selectedCustomer.purchases)
-      {
-        std::cout << "  Item: " << purchase.itemName
-                  << ", Price: $" << purchase.price
-                  << ", Quantity: " << purchase.quantity << std::endl;
-      }
+        std::cout << "Employees:" << std::endl;
+        for (const auto &emp : employees)
+        {
+            std::cout << "Name: " << emp.name << " < " << emp.email << " > "
+                      << ", Phone: " << emp.phone << ", Salary: $" << emp.salary << std::endl;
+        }
     }
-  }
+    else if (load_what == "customer")
+    {
+        std::cout << "\nCustomers:" << std::endl;
+        for (size_t i = 0; i < customers.size(); ++i)
+        {
+            std::cout << i + 1 << "." << customers[i].name << std::endl;
+        }
+    }
+    else if (load_what == "customer_purchase")
+    {
+        if (customer_number == "")
+        {
+            std::cerr << "Hey Invalid Input" << std::endl;
+        }
+        else
+        {
+            EvalResult cust_eval = env->get(customer_number);
+            int cust_num = cust_eval.as_integer();
 
-  return EvalResult(); // Return 0 to indicate success
+            const Customer &selectedCustomer = customers[cust_num - 1];
+
+            std::cout << "Name: " << selectedCustomer.name << ", Email: " << selectedCustomer.email << ", Phone: " << selectedCustomer.phone << std::endl;
+
+            std::cout << "Purchases for " << selectedCustomer.name << ":" << std::endl;
+
+            for (const auto &purchase : selectedCustomer.purchases)
+            {
+                std::cout << "  Item: " << purchase.itemName
+                          << ", Price: $" << purchase.price
+                          << ", Quantity: " << purchase.quantity << std::endl;
+            }
+        }
+    }
+
+    return EvalResult(); // Return 0 to indicate success
 }
+
 
 void Load_File::print(int indent) const
 {

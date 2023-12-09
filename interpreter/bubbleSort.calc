@@ -21,8 +21,9 @@ fun bubble_sort(input_arr)
 end fun
 
 id = 0
-n = 5
-array of int with bound [5] input_arr
+display "Enter the size"
+input n
+array of int with bound [n] input_arr
 
 while id < n
   input temp

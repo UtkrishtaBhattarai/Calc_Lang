@@ -1,6 +1,9 @@
+input CompanyName
+
+filename = CompanyName+".dat"
+
 display "Main Menu"
 
-filename = "acme.dat"
 var =1
 emp_loop = 1
 cus_loop = 1
