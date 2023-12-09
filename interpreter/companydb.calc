@@ -25,6 +25,7 @@ while var = 1
                 input Email
                 input Phone
                 input Salary
+                write filename employee Name Email Phone Salary
             end if 
             if emp_cho = 2
             emp_loop = emp_loop + 1
@@ -37,25 +38,30 @@ while var = 1
             display "(1) to Add Customer (2) to Enter Sale  (3) to View Customer and (4) to Main Menu"
             input cus_cho
                 if cus_cho = 1
-                    input cust_name
-                    input cust
+                    input Name
+                    input Email
                     input Phone
+                    write filename customer Name Email Phone
                 end if 
                 if cus_cho = 2
-                    display "Enter Sale"    
+                    load filename customer
+                    input customerChoice
+                    input Item
+                    input Quantity
+                    input Cost
+                    write filename customer_purchase customerId Item Quantity Cost
                 end if
 
                 if cus_cho = 3
                     load filename customer
-                    input smth
-                    load filename customer_purchase smth
+                    input choice
+                    load filename customer_purchase choice
                 end if
 
                 if cus_cho = 4
                     cus_loop = cus_loop + 1
                 end if
     end while
-            
     
     end if
     end while

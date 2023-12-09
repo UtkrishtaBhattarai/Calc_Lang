@@ -32,7 +32,7 @@ std::ostream &operator<<(std::ostream &os, const Lexer_Token &t) {
   "WITH",
   "BOUNDS","SET","GET", "SIZE", "UPDATE", "LOAD", "FETCH", "EMPLOYEE",
   "CUSTOMER",
-  "CUSTOMER_PURCHASE"};
+  "CUSTOMER_PURCHASE", "WRITE"};
   return os << token_label[t.tok] << " \"" << t.lexeme << "\" Line: " << t.line
             << " Column " << t.col;
 }
@@ -221,6 +221,7 @@ bool Lexer::lex_kw_or_id() {
   tokens["employee"] = EMPLOYEE;
   tokens["customer"] = CUSTOMER;
   tokens["customer_purchase"] = CUSTOMER_PURCHASE;
+  tokens["write"] = WRITE;
 
   // check to see if it starts properly
   if(_cur_char != '_' and not isalpha(_cur_char)){return false;}
