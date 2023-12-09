@@ -3,9 +3,6 @@ array of string with bound [2] my_arr
 my_arr.set "1"
 my_arr.set "2"
 
-
 id = 0
 y = my_arr.get id 
 display y
-
-
