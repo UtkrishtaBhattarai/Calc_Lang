@@ -822,6 +822,14 @@ Parse_Tree *Parser::parse_file_load()
     consume();
     Lexer_Token file_name = _lex->cur();
     consume();
-    return new Load_File(file_name);
+    std::string load_what = _lex->cur().lexeme.c_str();
+    consume();
+    std::string customer_number = "";    
+    if (load_what == "customer_purchase")
+    {  
+      customer_number = _lex->cur().lexeme.c_str();
+      consume();
+    }
+    return new Load_File(file_name,load_what, customer_number) ;
     }
 }

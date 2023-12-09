@@ -410,26 +410,17 @@ private:
 class Load_File : public Parse_Tree
 {
 public:
-  Load_File(const Lexer_Token &name_array);
+  Load_File(const Lexer_Token &name_array, const std::string &load_what, std::string &customer_number);
   virtual EvalResult eval(Ref_Env *env) override;
   void print(int indent) const override;
 
 private:
   Lexer_Token name_array;
+  std::string load_what;
+  std::string customer_number;
 };
 
 
-
-class Fetch_Data : public Parse_Tree
-{
-public:
-  Fetch_Data(const Lexer_Token &name_array);
-  virtual EvalResult eval(Ref_Env *env) override;
-  void print(int indent) const override;
-
-private:
-  Lexer_Token name_array;
-};
 
 
 #endif

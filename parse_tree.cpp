@@ -1304,12 +1304,6 @@ void Array_Size::print(int indent) const
   std::cout << "Array Assignment" << std::endl;
 }
 
-Load_File::Load_File(const Lexer_Token &name_array)
-    : name_array(name_array)
-{
-  // Constructor implementation if needed
-}
-
 struct Employee
 {
   std::string name;
@@ -1318,56 +1312,130 @@ struct Employee
   double salary;
 };
 
+struct Purchase
+{
+  std::string itemName;
+  double price;
+  int quantity;
+};
+
+struct Customer
+{
+  std::string name;
+  std::string email;
+  std::string phone;
+  std::vector<Purchase> purchases;
+};
+
+Load_File::Load_File(const Lexer_Token &name_array, const std::string &load_what, std::string &customer_number)
+    : name_array(name_array), load_what(load_what), customer_number(customer_number)
+{
+  // Constructor implementation if needed
+}
+
+std::vector<Employee> employees;
+std::vector<Customer> customers;
+Purchase purchase;
+
 EvalResult Load_File::eval(Ref_Env *env)
 {
 
+  employees.clear();
+  customers.clear();
+
   EvalResult var_val = env->get(name_array.lexeme);
+  std::string load_type = load_what;
   std::string filename = var_val.as_string();
-  std::fstream file(filename, std::ios::in | std::ios::out | std::ios::app);
+  std::fstream infile(filename, std::ios::in | std::ios::out | std::ios::app);
 
-  if (file.is_open())
+  if (!infile.is_open())
   {
+    std::cerr << "Error opening the file." << std::endl;
+    return EvalResult();
+  }
 
-    int numEmployees;
-    file >> numEmployees;
+  int numEmployees;
+  infile >> numEmployees;
+  infile.ignore();
 
-    std::vector<Employee> employees;
+  for (int i = 0; i < numEmployees; ++i)
+  {
+    Employee emp;
+    std::getline(infile, emp.name);
+    std::getline(infile, emp.email);
+    std::getline(infile, emp.phone);
+    infile >> emp.salary;
+    infile.ignore();
+    employees.push_back(emp);
+  }
 
-    for (int i = 0; i < numEmployees; ++i)
+  int numCustomers;
+  infile >> numCustomers;
+  infile.ignore();
+
+  for (int i = 0; i < numCustomers; ++i)
+  {
+    Customer cust;
+    infile >> cust.name;
+    infile.ignore();
+    std::getline(infile, cust.email);
+    std::getline(infile, cust.phone);
+
+    int numPurchases;
+    infile >> numPurchases;
+    infile.ignore();
+
+    for (int j = 0; j < numPurchases; ++j)
     {
-      Employee emp;
-      file.ignore(); // Ignore the newline character after the number of employees
-      std::getline(file, emp.name);
-      std::getline(file, emp.email);
-      std::getline(file, emp.phone);
-      file >> emp.salary;
-      employees.push_back(emp);
+      std::getline(infile, purchase.itemName);
+      infile >> purchase.price >> purchase.quantity;
+      infile.ignore();
+      cust.purchases.push_back(purchase);
     }
 
-    // Displaying the loaded employee data
+    customers.push_back(cust);
+  }
+
+  if (load_what == "employee")
+  {
     std::cout << "Employees:" << std::endl;
     for (const auto &emp : employees)
     {
-      std::cout << "Name: " << emp.name << "< " << emp.email << ">"
-                << ", Phone: " << emp.phone << ", Salary: $" << emp.salary << std::endl;
+      std::cout << "Name: " << emp.name << ", Email: " << emp.email << ", Phone: " << emp.phone << ", Salary: $" << emp.salary << std::endl;
     }
   }
-  else
-  {
-    // File doesn't exist, so create it with default values (0 0)
-    std::ofstream outfile(filename);
 
-    if (outfile.is_open())
+  else if (load_what == "customer")
+  {
+    std::cout << "\nCustomers:" << std::endl;
+    for (size_t i = 0; i < customers.size(); ++i)
     {
-      outfile << 0 << std::endl;
-      std::cout << "File created successfully with default values (0 0)." << std::endl;
+      std::cout << i + 1 << "." << customers[i].name << std::endl;
+    }
+  }
+  else if (load_what == "customer_purchase")
+  {
+    if (customer_number == "")
+    {
+      std::cerr << "Hey Invalid Input" << std::endl;
     }
     else
     {
-      std::cerr << "Error creating the file." << std::endl;
-      return EvalResult(); // Return an error code
+      EvalResult cust_eval = env->get(customer_number);
+      int cust_num = cust_eval.as_integer();
+
+      const Customer &selectedCustomer = customers[cust_num - 1];
+      std::cout << "Purchases for " << selectedCustomer.name << ":" << std::endl;
+
+      for (const auto &purchase : selectedCustomer.purchases)
+      {
+        std::cout << "  Item: " << purchase.itemName
+                  << ", Price: $" << purchase.price
+                  << ", Quantity: " << purchase.quantity << std::endl;
+      }
     }
   }
+
   return EvalResult(); // Return 0 to indicate success
 }
 

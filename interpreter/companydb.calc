@@ -3,34 +3,59 @@ display "Main Menu"
 filename = "acme.dat"
 var =1
 emp_loop = 1
+cus_loop = 1
 
 while var = 1
     display "1. Employees"
     display "2. Sales"
     display "3. Exit"
     emp_loop = 1
+    cus_loop = 1
     input user_choice
     while emp_loop = 1
-    if user_choice = 1
-        load filename
-        display "(1) to add an employee and (2) to return to Main Menu"
-        input emp_cho
-        if emp_cho = 1
-            input Name
-            input Email
-            input Phone
-            input Salary
-        end if 
-        if emp_cho = 2
-        emp_loop = emp_loop + 1
-            display "Exiting Employee"
+        if user_choice = 1
+            load filename employee 
+            display "(1) to add an employee and (2) to return to Main Menu"
+            input emp_cho
+            if emp_cho = 1
+                input Name
+                input Email
+                input Phone
+                input Salary
+            end if 
+            if emp_cho = 2
+            emp_loop = emp_loop + 1
+                display "Exiting Employee"
+            end if
         end if
+
+        if user_choice = 2
+        while cus_loop = 1
+            display "(1) to Add Customer (2) to Enter Sale  (3) to View Customer and (4) to Main Menu"
+            input cus_cho
+                if cus_cho = 1
+                    input cust_name
+                    input cust
+                    input Phone
+                end if 
+                if cus_cho = 2
+                    display "Enter Sale"    
+                end if
+
+                if cus_cho = 3
+                    load filename customer
+                    input smth
+                    load filename customer_purchase smth
+                end if
+
+                if cus_cho = 4
+                    cus_loop = cus_loop + 1
+                end if
+    end while
+            
+    
     end if
     end while
-
-
-
-
 end while
 
 

@@ -52,6 +52,9 @@ enum Token {
   UPDATE,
   LOAD,
   FETCH,
+  EMPLOYEE,
+  CUSTOMER,
+  CUSTOMER_PURCHASE,
 };
 
 // Tokens as emitted by the lexer
