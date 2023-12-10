@@ -136,10 +136,13 @@ Parse_Tree *Parser::parse_Statement_Body()
 {
   Parse_Tree *result;
 
-  if (has(ID))
+  if (has(CLASS))
   {
-
-    // get the ID from parse_Number
+    result = parse_Class_Decl();
+  }
+  else if (has(ID))
+  {
+   // get the ID from parse_Number
     result = parse_Ref();
     result = parse_Statement2(result);
   }
@@ -869,6 +872,6 @@ Parse_Tree *Parser::parse_Class_Decl()
 {
   must_be(CLASS);
   consume();
-  Lexer_Token class_name = _lex->cur();
+  Lexer_Token class_name = consume();
   return new Class_Declaration(class_name);
 }
