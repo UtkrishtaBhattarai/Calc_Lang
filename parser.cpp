@@ -864,3 +864,11 @@ Parse_Tree *Parser::close_file()
   consume();
   return new Close_File(file_name);
 }
+
+Parse_Tree *Parser::parse_Class_Decl()
+{
+  must_be(CLASS);
+  consume();
+  Lexer_Token class_name = _lex->cur();
+  return new Class_Declaration(class_name);
+}
