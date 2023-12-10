@@ -1,68 +1,66 @@
-input CompanyName
+fun displaySalesMenu()
+    display "(1) to Add Customer (2) to Enter Sale  (3) to View Customer and (4) to Main Menu"
+    input cus_cho
+    if cus_cho = 1
+        input Name
+        input Email
+        input Phone
+        write filename customer Name Email Phone
+        displaySalesMenu()
+    end if
 
-filename = CompanyName+".dat"
+    if cus_cho = 2
+        load filename customer
+        input customerChoice
+        input Item
+        input Quantity
+        input Cost
+        write filename customer_purchase customerChoice Item Quantity Cost
+        displaySalesMenu()
+    end if
 
-display "Main Menu"
+    if cus_cho = 3
+        load filename customer
+        input choice
+        load filename customer_purchase choice
+        displaySalesMenu()
+    end if
 
-var =1
-emp_loop = 1
-cus_loop = 1
+    if cus_cho = 4
+        displayMainMenu()
+    end if
+end fun
 
-while var = 1
+fun displayMainMenu()
+    display "   Main Menu"
     display "1. Employees"
     display "2. Sales"
     display "3. Exit"
-    emp_loop = 1
-    cus_loop = 1
+
     input user_choice
-    while emp_loop = 1
-        if user_choice = 1
-            load filename employee 
+
+    if user_choice = 1
+        load filename employee
+        display "(1) to add an employee and (2) to return to Main Menu"
+        input emp_cho
+        if emp_cho = 1
+            input Name
+            input Email
+            input Phone
+            input Salary
+            write filename employee Name Email Phone Salary
+            load filename employee
             display "(1) to add an employee and (2) to return to Main Menu"
-            input emp_cho
-            if emp_cho = 1
-                input Name
-                input Email
-                input Phone
-                input Salary
-                write filename employee Name Email Phone Salary
-            end if 
-            if emp_cho = 2
-            emp_loop = emp_loop + 1
-                display "Exiting Employee"
-            end if
         end if
+        if emp_cho = 2
+            display "Exiting Employee"
+        end if
+        displayMainMenu()
 
-        if user_choice = 2
-        while cus_loop = 1
-            display "(1) to Add Customer (2) to Enter Sale  (3) to View Customer and (4) to Main Menu"
-            input cus_cho
-                if cus_cho = 1
-                    input Name
-                    input Email
-                    input Phone
-                    write filename customer Name Email Phone
-                end if 
-                if cus_cho = 2
-                    load filename customer
-                    input customerChoice
-                    input Item
-                    input Quantity
-                    input Cost
-                    write filename customer_purchase customerId Item Quantity Cost
-                end if
+    end if
 
-                if cus_cho = 3
-                    load filename customer
-                    input choice
-                    load filename customer_purchase choice
-                end if
-
-                if cus_cho = 4
-                    cus_loop = cus_loop + 1
-                end if
-    end while
-    
+    if user_choice = 2
+        displaySalesMenu()
     end if
 
     if user_choice = 3
@@ -70,8 +68,14 @@ while var = 1
         display "Change Saved to the File"
         close filename
     end if
-    end while
-end while
+
+end fun
+
+input CompanyName
+
+filename = CompanyName+".dat"
+
+displayMainMenu()
 
 
 

@@ -525,7 +525,7 @@ EvalResult Display::eval(Ref_Env *env)
   }
   else if (value.type() == VECTOR)
   {
-    std::vector<int, std::allocator<int>> arrayElements = value.as_array();
+    std::vector<int, std::allocator<int> > arrayElements = value.as_array();
 
     std::cout << "[";
     for (const int &element : arrayElements)
@@ -1367,12 +1367,10 @@ EvalResult Load_File::eval(Ref_Env *env)
 
   EvalResult var_val = env->get(name_array.lexeme);
   std::string filename = var_val.as_string();
-  std::cout << "Opening file: " << filename << std::endl;
   std::fstream infile(filename, std::ios::in);
 
   if (!infile.is_open())
   {
-    std::cerr << "Error opening the file." << std::endl;
     return EvalResult();
   }
 
@@ -1429,41 +1427,47 @@ EvalResult Load_File::eval(Ref_Env *env)
     for (const auto &emp : employees)
     {
       std::cout << emp.name << " < " << emp.email << " > "
-                << " Phone: " << emp.phone << " Salary: $" << emp.salary << std::endl;
+                << " Phone: " << emp.phone << "  Salary: $" << emp.salary << std::endl;
     }
   }
   else if (load_what == "customer")
   {
-    std::cout << "\nCustomers:" << std::endl;
-    for (int i = 0; i < customers.size(); ++i)
-    {
-      std::cout << i + 1 << "." << customers[i].name << std::endl;
-    }
+      if(customers.size() > 0){
+          std::cout << "\nCustomers:" << std::endl;
+          for (int i = 0; i < customers.size(); ++i)
+          {
+              std::cout << i + 1 << "." << customers[i].name << std::endl;
+          }
+      } else{
+          std::cout << "Error: No Customers." << std::endl;
+      }
   }
   else if (load_what == "customer_purchase")
   {
+      if(customers.size() > 0){
+          if (customer_number == "")
+          {
+              std::cerr << "Invalid Input" << std::endl;
+          }else {
+              EvalResult cust_eval = env->get(customer_number);
+              int cust_num = cust_eval.as_integer();
 
-    if (customer_number == "")
-    {
-      std::cerr << "Invalid Input" << std::endl;
-    }
-    else
-    {
-      EvalResult cust_eval = env->get(customer_number);
-      int cust_num = cust_eval.as_integer();
+              const Customer &selectedCustomer = customers[cust_num - 1];
 
-      const Customer &selectedCustomer = customers[cust_num - 1];
+              std::cout << selectedCustomer.name << " < " << selectedCustomer.email << " > Phone: " << selectedCustomer.phone << std::endl;
 
-      std::cout << selectedCustomer.name << " < " << selectedCustomer.email << " > Phone: " << selectedCustomer.phone << std::endl;
+              std::cout << "Order History " << std::endl;
+              std::cout << "Item             Price      Quantity     Total" << std::endl;
 
-      std::cout << "Order History " << std::endl;
-      std::cout << "Item                   Price     Quantity     Total" << std::endl;
-
-      for (const auto &purchase : selectedCustomer.purchases)
-      {
-        std::cout << purchase.itemName << "     $" << purchase.price << "    " << purchase.quantity << "     $" << purchase.quantity * purchase.price << std::endl;
+              for (const auto &purchase : selectedCustomer.purchases)
+              {
+                  std::cout << purchase.itemName << "     $" << purchase.price << "    " << purchase.quantity << "     $" << purchase.quantity * purchase.price << std::endl;
+              }
+          }
+      } else{
+          std::cout << "Error: No Customers." << std::endl;
       }
-    }
+
   }
 
   return EvalResult(); // Return 0 to indicate success
@@ -1524,41 +1528,104 @@ EvalResult Write_File::eval(Ref_Env *env)
 
     // Append the new employee to the vector
     customers.push_back(customer);
-  }
-  else if (write_type == "customer_purchase")
+  }else if (write_type == "customer_purchase")
   {
-    if (customer_number == "")
+      if (customer_number == "")
+      {
+          std::cerr << "Invalid Input: Customer number is empty" << std::endl;
+      }
+      else
+      {
+          std::cout << "Debug: customer_number value: " << env->get(customer_number).as_integer() << std::endl;
+
+          int cust_num = env->get(customer_number).as_integer();
+          std::cout << "Debug: cust_num before check: " << cust_num << std::endl;
+
+
+          if (cust_num <= 0 || cust_num > customers.size())
+          {
+              std::cerr << "Invalid Customer Number: " << cust_num << std::endl;
+          }
+          else
+          {
+              Customer &selectedCustomer = customers[cust_num - 1];
+              std::string item = env->get(this->variables[i].lexeme).as_string();
+              int quantity = env->get(this->variables[i + 1].lexeme).as_integer();
+              double cost = env->get(this->variables[i + 2].lexeme).as_integer();
+
+              Purchase purchaseDetails;
+              purchaseDetails.itemName = item;
+              purchaseDetails.quantity = quantity;
+              purchaseDetails.price = cost;
+
+              selectedCustomer.purchases.push_back(purchaseDetails);
+          }
+      }
+  }
+
+    std::cout << "Writing data for " << filename << ":" << std::endl;
+    std::string final_data = "";
+    if (employees.size() > 0)
     {
-      std::cerr << "Invalid Input" << std::endl;
+        final_data += std::to_string(employees.size()) + "\n";
+        for (const Employee &employee : employees)
+        {
+            final_data += employee.name + "\n";
+            final_data += employee.email + "\n";
+            final_data += employee.phone + "\n";
+            final_data += std::to_string(employee.salary) + "\n";
+        }
     }
     else
     {
-
-      std::string item = env->get(this->variables[i].lexeme).as_string();
-      int quantity = env->get(this->variables[i + 1].lexeme).as_integer();
-      double cost = env->get(this->variables[i + 2].lexeme).as_integer();
-
-      EvalResult cust_eval = env->get(customer_number);
-      int cust_num = cust_eval.as_integer();
-
-      Customer &selectedCustomer = customers[cust_num - 1];
-
-      Purchase purchaseDetails;
-
-      purchaseDetails.itemName = item;
-      purchaseDetails.quantity = quantity;
-      purchaseDetails.price = cost;
-
-      selectedCustomer.purchases.push_back(purchaseDetails);
+        final_data += std::to_string(0) + "\n";
     }
-    // Add other write logic as needed
-    return EvalResult();
+
+    if (customers.size() > 0)
+    {
+        final_data += std::to_string(customers.size()) + "\n";
+        for (const Customer &customer : customers)
+        {
+            final_data += customer.name + "\n";
+            final_data += customer.email + "\n";
+            final_data += customer.phone + "\n";
+            const std::vector<Purchase> &purchases = customer.purchases;
+            if (purchases.size() > 0)
+            {
+                final_data += std::to_string(purchases.size()) + "\n";
+                for (const Purchase &purchase : purchases)
+                {
+                    final_data += purchase.itemName + "\n";
+                    final_data += std::to_string(purchase.quantity) + "\n";
+                    final_data += std::to_string(purchase.price) + "\n";
+                }
+            }
+            else
+            {
+                final_data += std::to_string(0) + "\n";
+            }
+        }
     }
-  return EvalResult(); // Return a placeholder result
+
+    try
+    {
+        std::ofstream outFile(filename);
+        outFile << final_data;
+        outFile.close();
+    }
+    catch (std::exception &e)
+    {
+        std::cerr << "Failed to write to file: " << e.what() << std::endl;
+    }
+
+
+    return EvalResult(); // Return a placeholder result
 }
 
 void Write_File::print(int indent) const
 {
+    std::cout << "Writing Data To File" << std::endl;
+
 }
 
 Close_File::Close_File(const Lexer_Token &file_name)
@@ -1568,70 +1635,7 @@ Close_File::Close_File(const Lexer_Token &file_name)
 
 EvalResult Close_File::eval(Ref_Env *env)
 {
-  // Assuming the name_array contains the name of the variable to be written
-  EvalResult var_val = env->get(file_name.lexeme);
-
-  std::string filename = var_val.as_string();
-
-  std::cout << "Writing data for " << var_val.as_string() << ":" << std::endl;
-  int i = 0;
-  std::string final_data = "";
-  if (employees.size() > 0)
-  {
-    final_data += std::to_string(employees.size()) + "\n";
-    for (const Employee &employee : employees)
-    {
-      final_data += employee.name + "\n";
-      final_data += employee.email + "\n";
-      final_data += employee.phone + "\n";
-      final_data += std::to_string(employee.salary) + "\n";
-    }
-  }
-  else
-  {
-    final_data += std::to_string(0) + "\n";
-  }
-
-  if (customers.size() > 0)
-  {
-    final_data += std::to_string(customers.size()) + "\n";
-    for (const Customer &customer : customers)
-    {
-      final_data += customer.name + "\n";
-      final_data += customer.email + "\n";
-      final_data += customer.phone + "\n";
-      const std::vector<Purchase> &purchases = customer.purchases;
-      if (purchases.size() > 0)
-      {
-        final_data += std::to_string(purchases.size()) + "\n";
-        for (const Purchase &purchase : purchases)
-        {
-          final_data += purchase.itemName + "\n";
-          final_data += std::to_string(purchase.quantity) + "\n";
-          final_data += std::to_string(purchase.price) + "\n";
-        }
-      }
-      else
-      {
-        final_data += std::to_string(0) + "\n";
-      }
-    }
-  }
-
-  try
-  {
-    std::ofstream outFile(filename);
-    outFile << final_data;
-    outFile.close();
-  }
-  catch (std::exception &e)
-  {
-    std::cerr << "Failed to write to file: " << e.what() << std::endl;
-  }
-
-  // Add other write logic as needed
-  exit(0);
-  return EvalResult(); // Return a placeholder result
+    exit(0);
 }
 
 void Close_File::print(int indent) const
