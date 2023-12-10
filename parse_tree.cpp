@@ -119,7 +119,6 @@ std::vector<int> EvalResult::as_array()
     return _myarray;
   }
   // Handle the case where the type is not an array or the array is empty
-  // You can return an empty vector or throw an error depending on your design
   return std::vector<int>();
 }
 
@@ -1036,6 +1035,7 @@ void Fun_Call::print(int indent) const
   left()->print(indent + 1);
   right()->print(indent + 1);
 }
+
 Array_Declaration::Array_Declaration(const Lexer_Token &type, const Lexer_Token &bound, const Lexer_Token &name)
     : type_(type), bound_(bound), name_(name) {}
 
@@ -1130,7 +1130,7 @@ EvalResult ArrayAssignment::eval(Ref_Env *env)
 
     // Update the array in the environment
     EvalResult updatedArray;
-    updatedArray.set(arrayValues); // Assuming set method is available in your EvalResult class
+    updatedArray.set(arrayValues);
     env->set(arrayName, updatedArray);
   }
   return result;
@@ -1641,4 +1641,24 @@ EvalResult Close_File::eval(Ref_Env *env)
 void Close_File::print(int indent) const
 {
   std::cout << "Closing File" << std::endl;
+}
+
+Class_Declaration::Class_Declaration(const Lexer_Token &name)
+    : name_(name) {}
+
+EvalResult Class_Declaration::eval(Ref_Env *env)
+{
+  std::string name = name_.lexeme;
+
+  return EvalResult();
+}
+
+void Class_Declaration::print(int indent) const
+{
+  // Print the array declaration
+  std::cout << std::setw(indent) << "";
+  std::cout << "Class Declaration" << std::endl;
+
+  std::cout << std::setw(indent + 1) << "";
+  std::cout << "Name: " << name_ << std::endl;
 }

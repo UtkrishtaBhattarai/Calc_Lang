@@ -362,6 +362,7 @@ private:
   Lexer_Token name_;
 };
 
+
 class ArrayAssignment : public BinaryOp
 {
 public:
@@ -447,6 +448,17 @@ private:
   Lexer_Token file_name;
 };
 
+
+class Class_Declaration : public Parse_Tree
+{
+public:
+  Class_Declaration(const Lexer_Token &name);
+  EvalResult eval(Ref_Env *env) override;
+  void print(int indent) const override;
+
+private:
+  Lexer_Token name_;
+};
 
 
 #endif
