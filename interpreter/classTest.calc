@@ -1,0 +1,39 @@
+class Test
+    name = ""
+    email = ""
+    phone = ""
+
+    fun setName(_name)
+        name = _name
+    end fun
+    fun getName()
+        display name
+    end fun
+    fun setEmail(_email)
+        email = _email
+    end fun
+    fun getEmail()
+        display email
+    end fun
+    fun setPhone(_phone)
+        phone = _phone
+    end fun
+    fun getPhone()
+        display phone
+    end fun
+
+class end
+
+#Object obj = new Test()
+calcext = "calcext"
+obj.setName(calcext)
+obj.setEmail("calcext@semo.edu")
+obj.setPhone("1234566")
+
+display "Name: "
+getName()
+display "Email: "
+obj.getEmail()
+display "Phone: "
+obj.getPhone()
+

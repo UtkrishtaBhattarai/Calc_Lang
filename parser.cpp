@@ -90,38 +90,6 @@ Parse_Tree *Parser::parse_Statement()
 }
 
 /*
-< Statement >    ::= ID < Statement' > NEWLINE
-                     | < IO-Operation > NEWLINE
-                     | < Expression > NEWLINE
-                     | NEWLINE
- */
-/*
-Parse_Tree* Parser::parse_Statement() {
-  Parse_Tree *result;
-
-  if(has(NEWLINE)) {
-    consume();
-    return nullptr;
-  }
-
-  if(has(ID)) {
-    // get the ID from parse_Number
-    result = parse_Number();
-    result = parse_Statement2(result);
-  } else if(has(INPUT) or has(DISPLAY)) {
-    result = parse_IO_Operation();
-  } else {
-    result = parse_Expression();
-  }
-
-  must_be(NEWLINE);
-  consume();
-
-  return result;
-}
-*/
-
-/*
 < Statement-Body > ::= < Ref > < Statement' >
                        | < IO-Operation >
                        | < Record-Decl >
@@ -129,16 +97,43 @@ Parse_Tree* Parser::parse_Statement() {
                        | < Loop >
                        | < Fun-Def >
                        | < Expression >
+                       | < Class-Dec>
                        | ""
  */
 
 Parse_Tree *Parser::parse_Statement_Body()
 {
   Parse_Tree *result;
+    if(has(CLASS)){
+        consume();
+        if(has(ID)){
+            consume();
+            must_be(NEWLINE);
+            consume();
+        }else{
+            must_be(END);
+            consume();
+            must_be(NEWLINE);
+            consume();
+        }
+    }else if(has(OBJECT)){
+        consume();
+        must_be(ID); consume();
+        must_be(EQUAL); consume();
+        must_be(NEW); consume();
+        must_be(ID); consume();
+        must_be(LPAREN); consume();
+        must_be(RPAREN); consume();
+        must_be(NEWLINE); consume();
+    }
+  if(has(OBJ)){
+      consume();
+      must_be(DOT);
+      consume();
+  }
 
   if (has(ID))
   {
-
     // get the ID from parse_Number
     result = parse_Ref();
     result = parse_Statement2(result);
@@ -171,6 +166,13 @@ Parse_Tree *Parser::parse_Statement_Body()
   {
     result = parse_file_load();
   }
+  else if(has(CLASS))
+  {
+      result = parse_Class_Dec();
+  }
+  else if (has(OBJECT)){
+      result = parse_Class_Inst();
+  }
   else if (not has(NEWLINE))
   {
     result = parse_Expression();
@@ -183,31 +185,6 @@ Parse_Tree *Parser::parse_Statement_Body()
   return result;
 }
 
-/*
-< Statement' >   ::= EQUAL < Expression >
-                     | < Factor' > < Term' > < Expression' >
-*/
-/*
-Parse_Tree *Parser::parse_Statement2(Parse_Tree *left)
-{
-  Parse_Tree *result;
-
-  if(has(EQUAL)) {
-    // this an assignment
-    consume();
-    Assignment *result = new Assignment();
-    result->left(left);
-    result->right(parse_Expression());
-    return result;
-  } else {
-    result = parse_Factor2(left);
-    result = parse_Term2(result);
-    result = parse_Expression2(result);
-  }
-
-  return result;
-}
-*/
 
 /*
 < Statement' >   ::= EQUAL < Statement'' >
@@ -239,6 +216,7 @@ Parse_Tree *Parser::parse_Statement2(Parse_Tree *left)
 
 /*
 < Statement'' >  ::= < Expression >
+                    | < Class-Inst >
                     | < Record-Inst >
 */
 Parse_Tree *Parser::parse_Statement3(Parse_Tree *left)
@@ -311,6 +289,21 @@ Parse_Tree *Parser::parse_Loop()
   must_be(WHILE);
   consume();
   return result;
+}
+
+/*
+<Function-List>  ::= <Function-List> <Function-def> "\n"
+                    | <Function-def> "\n"
+ */
+Parse_Tree *Parser::parse_Fun_List()
+{
+    Fun_List *result = new Fun_List();
+    while(not has(END)){
+        result->add(parse_Fun_Def());
+        must_be(NEWLINE);
+        consume();
+    }
+    return result;
 }
 
 /*
@@ -412,6 +405,93 @@ Parse_Tree *Parser::parse_Expression2(Parse_Tree *left)
 
   // "" rule
   return left;
+}
+
+
+/*
+< Class-Decl-List > 		    ::= < Class-Decl > < Class-Decl-List' >
+
+< Class-Decl-List' > 		    ::= < Class-Decl > < Class-Decl-List' >
+                                    | ""
+*/
+
+/*
+< Class-Decl >      ::= “class” < Id > < Inheritance > “\n” < Assignment-List > "\n" <Function-List> “end” “class”
+ */
+
+Parse_Tree *Parser::parse_Class_Dec() {
+    must_be(CLASS);
+    consume();
+    must_be(ID);
+    Lexer_Token id = consume();
+
+    /*if(has(INHERITS))
+        result = parse_Inheritance();*/
+    must_be(NEWLINE);
+    consume();
+
+    Parse_Tree *assignmentList = parse_Assignment_List();
+    Parse_Tree *funList = parse_Fun_List();
+
+    must_be(END);
+    consume();
+    must_be(CLASS);
+    consume();
+
+    Clas_Dec *result = new Clas_Dec(id);
+    result->left(assignmentList);
+    result->right(funList);
+    return (Parse_Tree *)result;
+}
+
+Parse_Tree *Parser::parse_Assignment_List(){
+    Assign_List *result = new Assign_List();
+    while(has(ID)){
+        // check for an empty list
+        if(has(FUN) || has(END)){
+            return result;
+        }
+        // get the ID from parse_Number
+        result -> add(parse_Statement());
+    }
+    return result;
+}
+
+/*
+< Inheritance > 		    ::= “inherits” < Id >
+  				                | “”
+*/
+Parse_Tree *Parser::parse_Inheritance() {
+
+}
+
+/*
+< Class-Inst >                  ::= NEW < Ref > LPAREN < Arg-List > RPAREN
+ */
+Parse_Tree *Parser::parse_Class_Inst()
+{
+    std::cout<<"Inside parse_Class_Inst"<<std::endl;
+    must_be(OBJECT);
+    consume();
+    must_be(OF);
+    consume();
+    must_be(ID);    //ClassType
+    Lexer_Token clas = consume();
+    Clas_Inst *result = new Clas_Inst(clas);
+    must_be((ID));  //ObjectName
+    result->left(new Variable(consume()));
+    must_be(EQUAL);
+    consume();
+    must_be(NEW);
+    consume();
+    must_be(ID);
+    consume();
+    must_be(LPAREN);
+    consume();
+    result->right(parse_Arg_List());
+    must_be(RPAREN);
+    consume();
+    return result;
 }
 
 /*
@@ -669,6 +749,8 @@ Parse_Tree *Parser::parse_Ref()
 {
   must_be(ID);
   Lexer_Token lx = _lex->cur();
+  std::cout<<"lx"<<lx<<std::endl;
+  std::cout<<""<<std::endl;
   Parse_Tree *left = new Variable(consume());
   if (has(DOT))
   {
@@ -733,6 +815,9 @@ Parse_Tree *Parser::parse_Ref2(Parse_Tree *left)
     result->right(new Variable(consume()));
 
     return parse_Ref2(result);
+  }
+  else if(has(OBJ)){
+      std::cout<<"This is object"<<std::endl;
   }
   else if (has(LPAREN))
   {

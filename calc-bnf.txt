@@ -1,35 +1,51 @@
-< Program > ::= < Program > < Statement >
-                | < Statement >
+< Program >                 ::= < Program > < Statement >
+                               | < Statement >
                 
-< Statement >    ::= < Statement-Body > "\n"
+< Statement >               ::= < Statement-Body > "\n"
 
-< Statement-Body > ::= < Expression >
-                       | < Assignment >
-                       | < IO-Operation >
-                       | < Record-Decl >
-                       | < Branch >
-                       | < Loop >
-                       | < Function-Def >
-                       | ""
+< Statement-Body >          ::= < Expression >
+                              | < Assignment >
+                              | < IO-Operation >
+                              | < Record-Decl >
+                              | < Branch >
+                              | < Loop >
+                              | < Function-Def >
+                              | < Class-Decl-List >
+                              | < Class-Inst>
+                              | ""
 
-< Assignment >   ::= < Ref > "=" < Expression >
-                     | < Ref > "=" < Record-Inst >
+< Class-Decl-List > 		::= < Class-Decl-List > < Class-Decl >
+                               | < Class-Decl >
 
-< Record-Inst >  ::= "new" < Id > 
+< Class-Decl > 		        ::= “class” < Id > < Inheritance > “\n” "attribute" <Assignment-List > "\n" <Function-List> “end” “class”
 
-< IO-Operation > ::= "display" < Expression >
-                     | "input" < Ref >
+< Inheritance > 		    ::= “inherits” < Id >
+  				               | “”
 
-< Record-Decl >  ::= "record" < Id > "\n" < Field-List > "end" "record"
+< Class-Inst >             ::= Object of < Id > <Ref> = "new" < Id > "(" < Arg-List > ")"
 
-< Field-List >   ::= < Field-List > < Field >
-                     | < Field >
+< Assignment >              ::= < Ref > "=" < Expression >
+                               | < Ref > "=" < Record-Inst >
+                               | < Ref > "=" < Class-Inst >
+
+< Record-Inst >             ::= "new" < Id >
+
+< IO-Operation >            ::= "display" < Expression >
+                              | "input" < Ref >
+
+< Record-Decl >             ::= "record" < Id > "\n" < Field-List > "end" "record"
+
+< Field-List >              ::= < Field-List > < Field >
+                              | < Field >
 
 < Field >        ::= "field" < Id > "\n"
 
 < Branch >       ::= "if" < Condition > "\n" < Program > "end" "if"
 
 < Loop >         ::= "while" < Condition > "\n" < Program > "end" "while"
+
+<Function-List>  ::= <Function-List> <Function-def> "\n"
+                    | <Function-def> "\n"
 
 < Function-Def > ::= "fun" < Id > "(" < Param-List > ")" "\n" < Program > "end" "fun"
 

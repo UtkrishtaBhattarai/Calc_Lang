@@ -9,7 +9,7 @@
 // class prototype
 class Ref_Env;
 class Fun_Def;
-class Class_Def;
+class Clas_Dec;
 
 class Closure
 {
@@ -18,6 +18,15 @@ public:
   Ref_Env *env;
 
   Closure(Fun_Def *fun, Ref_Env *env);
+};
+
+class ClassClosure
+{
+public:
+    Clas_Dec *clas;
+    Ref_Env *env;
+
+    ClassClosure(Clas_Dec *clas, Ref_Env *env);
 };
 
 //////////////////////////////////////////
@@ -32,7 +41,8 @@ enum EvalType
   BOOLEAN,
   FUNCTION,
   STRING,
-  VECTOR
+  VECTOR,
+  CLAS
 };
 class EvalResult
 {
@@ -47,6 +57,7 @@ public:
   virtual void set(double _d);
   virtual void set(bool _b);
   virtual void set(Closure *_fun);
+  virtual void set(ClassClosure *_clas);
   virtual void set(std::string _b);
   virtual void set(std::vector<int> _myarray);
 
@@ -55,6 +66,7 @@ public:
   virtual double as_real();
   virtual bool as_bool();
   virtual Closure *as_fun();
+  virtual ClassClosure *as_clas();
   virtual std::string as_string();
   virtual std::vector<int> as_array();
 
@@ -67,6 +79,7 @@ private:
   bool _b;                   // a boolean value
   EvalType _type;            // the type
   Closure *_fun;             // a function definition
+  ClassClosure *_clas;             // a class declaration
   std::string _str;          // a string defination
   std::vector<int> _myarray; // for an array or vector
 };
@@ -330,6 +343,21 @@ public:
   virtual void print(int indent) const;
 };
 
+class Assign_List : public NaryOp
+{
+public:
+    virtual EvalResult eval(Ref_Env *env);
+    virtual void print(int indent) const;
+};
+
+class Fun_List : public NaryOp
+{
+public:
+    virtual EvalResult eval(Ref_Env *env);
+    virtual void print(int indent) const;
+};
+
+
 class Fun_Def : public BinaryOp
 {
 public:
@@ -347,6 +375,39 @@ class Fun_Call : public BinaryOp
 public:
   virtual EvalResult eval(Ref_Env *env);
   virtual void print(int indent) const;
+};
+
+class Clas_Dec : public BinaryOp
+{
+public:
+    Clas_Dec(const Lexer_Token &tok);
+    virtual EvalResult eval(Ref_Env *env);
+    virtual void print(int indent) const;
+    virtual std::string name() const;
+
+private:
+    Variable var;
+};
+
+class Clas_Inst : public BinaryOp
+{
+public:
+    Clas_Inst(const Lexer_Token &clas_name);
+    virtual EvalResult eval(Ref_Env *env);
+    virtual void print(int indent) const;
+
+private:
+    Lexer_Token clas_name_;
+};
+
+class Clas_Access : public BinaryOp
+{
+public:
+    Clas_Access(const Lexer_Token &clas_name);
+    virtual EvalResult eval(Ref_Env *env);
+    virtual void print(int indent) const;
+private:
+    Lexer_Token clas_name;
 };
 
 class Array_Declaration : public Parse_Tree

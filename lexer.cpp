@@ -27,12 +27,12 @@ std::ostream &operator<<(std::ostream &os, const Lexer_Token &t) {
       "INVALID", "EOI", "NEWLINE", "PLUS",   "MINUS",  "TIMES",  "DIVIDE",
       "MOD",     "POW", "LPAREN",  "RPAREN", "INTLIT", "REALLIT", "EQUAL",
        "DISPLAY", "INPUT", "ID", "DOT", "NEW", "RECORD", "END", "FIELD",
-        "IF", "WHILE", "NE", "LT", "GT", "LTE", "GTE", "FUN", "COMMA", "CLASS", "STRLIT","ARRAY", "LBRACKET",
+        "IF", "WHILE", "NE", "LT", "GT", "LTE", "GTE", "FUN", "COMMA", "CLASS", "INHERITS","ATTRIBUTE", "STRLIT","ARRAY", "LBRACKET",
   "RBRACKET","OF", 
   "WITH",
   "BOUNDS","SET","GET", "SIZE", "UPDATE", "LOAD", "FETCH", "EMPLOYEE",
   "CUSTOMER",
-  "CUSTOMER_PURCHASE"};
+  "CUSTOMER_PURCHASE","OBJECT", "OBJ"};
   return os << token_label[t.tok] << " \"" << t.lexeme << "\" Line: " << t.line
             << " Column " << t.col;
 }
@@ -208,6 +208,8 @@ bool Lexer::lex_kw_or_id() {
   tokens["while"] = WHILE;
   tokens["fun"] = FUN;
   tokens["class"] = CLASS;
+  tokens["inherits"] = INHERITS;
+  tokens["attribute"] = ATTRIBUTE;
   tokens["array"] = ARRAY;
   tokens["of"] = OF;
   tokens["with"] = WITH;
@@ -221,6 +223,8 @@ bool Lexer::lex_kw_or_id() {
   tokens["employee"] = EMPLOYEE;
   tokens["customer"] = CUSTOMER;
   tokens["customer_purchase"] = CUSTOMER_PURCHASE;
+  tokens["Object"] = OBJECT;
+  tokens["obj"] = OBJ;
 
   // check to see if it starts properly
   if(_cur_char != '_' and not isalpha(_cur_char)){return false;}

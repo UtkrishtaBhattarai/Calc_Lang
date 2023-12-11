@@ -9,36 +9,50 @@ To eliminate left recursion
   
 Parser (Context-Free)
 =========================================
-< Program > ::= < Statement > < Program' >
+< Program >                     ::= < Statement > < Program' >
 
-< Program' > ::=  < Statement > < Program' > 
-                  | ""
+< Program' >                    ::=  < Statement > < Program' >
+                                    | ""
 
-< Statement >    ::= < Statement-Body > NEWLINE
-< Statement-Body > ::= < Ref > < Statement' > 
-                     | < IO-Operation > 
-                     | < Record-Decl > 
-                     | < Branch >
-                     | < Loop >
-                     | < Function-Def >
-                     | < Expression > 
-                     | ""
+< Statement >                   ::= < Statement-Body > NEWLINE
 
-< Statement' >   ::= EQUAL < Statement'' > 
-                     | < Factor' > < Term' > < Expression' >
+< Statement-Body >              ::= < Ref > < Statement' >
+                                    | < IO-Operation >
+                                    | < Record-Decl >
+                                    | < Branch >
+                                    | < Loop >
+                                    | < Function-Def >
+                                    | < Expression >
+                                    | < Class-Dec-List >
+                                    | ""
 
-< Statement'' >  ::= < Expression > 
-                     | < Record-Inst >
+< Statement' >                  ::= EQUAL < Statement'' >
+                                    | < Factor' > < Term' > < Expression' >
+
+< Statement'' >                 ::= < Expression >
+                                    | < Record-Inst >
+                                    | < Class-Inst >
+
+< Class-Decl-List > 		    ::= < Class-Decl > < Class-Decl-List' >
+
+< Class-Decl-List' > 		    ::= < Class-Decl > < Class-Decl-List' >
+                                    | ""
+< Class-Decl > 		            ::= CLASS < Id > < Inheritance > NEWLINE ATTRIBUTE <Assignment-List > NEWLINE <Function-List> END CLASS
+
+< Class-Inst >                  ::= NEW < Ref > LPAREN < Arg-List > RPAREN
+
+< Inheritance > 		        ::= INHERITS < Id >
+  				                    | “”
                      
-< Record-Inst >  ::= NEW ID
+< Record-Inst >                 ::= NEW ID
 
-< IO-Operation > ::= DISPLAY < Expression >
-                     | INPUT ID
+< IO-Operation >                ::= DISPLAY < Expression >
+                                    | INPUT ID
                      
-< Record-Decl >  ::= RECORD ID NEWLINE < Field-List > END RECORD
+< Record-Decl >                 ::= RECORD ID NEWLINE < Field-List > END RECORD
 
-< Field-List >   ::= < Field-List > < Field >
-                     | < Field >
+< Field-List >                  ::= < Field-List > < Field >
+                                    | < Field >
 
 < Field >        ::= FIELD ID NEWLINE
 
@@ -46,6 +60,8 @@ Parser (Context-Free)
 
 < Loop >         ::= WHILE < Condition > NEWLINE < Program > END WHILE
 
+<Function-List>  ::= <Function-List> <Function-def>
+                    | <Function-def>
 
 < Function-Def > ::= FUN ID LPAREN < Param-List > RPAREN NEWLINE < Program > END FUN
 

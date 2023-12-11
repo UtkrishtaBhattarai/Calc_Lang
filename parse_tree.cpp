@@ -15,6 +15,12 @@ Closure::Closure(Fun_Def *fun, Ref_Env *env)
   this->env = env;
 }
 
+ClassClosure::ClassClosure(Clas_Dec *clas, Ref_Env *env)
+{
+    this->clas = clas;
+    this->env = env;
+}
+
 //////////////////////////////////////////
 // Evaluation Results
 //////////////////////////////////////////
@@ -56,6 +62,12 @@ void EvalResult::set(Closure *_fun)
 {
   this->_fun = _fun;
   _type = FUNCTION;
+}
+
+void EvalResult::set(ClassClosure *_clas)
+{
+    this->_clas = _clas;
+    _type = CLAS;
 }
 
 void EvalResult::set(std::vector<int> _myarray)
@@ -110,6 +122,11 @@ bool EvalResult::as_bool()
 Closure *EvalResult::as_fun()
 {
   return _fun;
+}
+
+ClassClosure *EvalResult::as_clas()
+{
+    return _clas;
 }
 
 std::vector<int> EvalResult::as_array()
@@ -525,7 +542,7 @@ EvalResult Display::eval(Ref_Env *env)
   }
   else if (value.type() == VECTOR)
   {
-    std::vector<int, std::allocator<int>> arrayElements = value.as_array();
+    std::vector<int, std::allocator<int> > arrayElements = value.as_array();
 
     std::cout << "[";
     for (const int &element : arrayElements)
@@ -615,11 +632,22 @@ void Input::print(int indent) const
 
 EvalResult Record_Instantiation::eval(Ref_Env *env)
 {
-  EvalResult result;
+
+    EvalResult result;
 
   // TODO: Implement this
 
-  return result;
+    /*
+    EvalResult recordType = env->get(recordTypeName);
+    if (recordType.type() != EvalType::RECORD) {
+        std::cerr << "Error: '" << recordTypeName << "' is not a record type." << std::endl;
+        return EvalResult();
+    }
+    RecordInstance *newInstance = new RecordInstance(recordTypeName);
+    result.set(newInstance);
+     */
+
+    return result;
 }
 
 void Record_Instantiation::print(int indent) const
@@ -964,6 +992,34 @@ void Parse_List::print(int indent) const
   }
 }
 
+EvalResult Assign_List::eval(Ref_Env *env)
+{
+    return EvalResult();
+}
+
+void Assign_List::print(int indent) const
+{
+    // loop over the children
+    for (auto itr = begin(); itr != end(); itr++)
+    {
+        (*itr)->print(indent + 1);
+    }
+}
+
+EvalResult Fun_List::eval(Ref_Env *env)
+{
+    return EvalResult();
+}
+
+void Fun_List::print(int indent) const
+{
+    // loop over the children
+    for (auto itr = begin(); itr != end(); itr++)
+    {
+        (*itr)->print(indent + 1);
+    }
+}
+
 Fun_Def::Fun_Def(const Lexer_Token &tok) : var(tok)
 {
 }
@@ -1035,6 +1091,152 @@ void Fun_Call::print(int indent) const
   std::cout << "function call " << std::endl;
   left()->print(indent + 1);
   right()->print(indent + 1);
+}
+
+
+Clas_Dec::Clas_Dec(const Lexer_Token &tok) : var(tok)
+{
+}
+
+EvalResult Clas_Dec::eval(Ref_Env *env)
+{
+    EvalResult value;
+    value.set(new ClassClosure(this, env));
+    env->set(name(), value);
+    return EvalResult();
+}
+
+std::string Clas_Dec::name() const
+{
+    return var.name();
+}
+
+void Clas_Dec::print(int indent) const
+{
+    // print ourself
+    std::cout << std::setw(indent) << "";
+    std::cout << "clas " << name() << std::endl;
+    std::cout << std::setw(indent) << "";
+    std::cout << "Assignment List";
+    left()->print(indent + 1);
+    std::cout << std::setw(indent) << "";
+    std::cout << "Functions";
+    right()->print(indent + 1);
+}
+
+Clas_Inst::Clas_Inst(const Lexer_Token &clas_name)
+        : clas_name_(clas_name) {}
+
+EvalResult Clas_Inst::eval(Ref_Env *env)
+{
+    std::string clasName = clas_name_.lexeme;
+    std::cout<<"clasName"<<clasName<<std::endl;
+
+    // Check if the array variable exists in the environment
+    EvalResult *clasVar = env->lookup(clasName);
+    std::cout<<"clasVar"<<clasVar<<std::endl;
+    std::cout<<"clasVar type"<<clasVar->type()<<std::endl;
+
+    // retrieve the function
+    EvalResult cl = left()->eval(env);
+    std::cout<<"No error bruh"<<std::endl;
+
+    // if we don't have a function, return an error
+    if (cl.type() != CLAS)
+    {
+        std::cerr << "Error: Attempted to call a non-function" << std::endl;
+        return EvalResult();
+    }
+
+    // Check parameter binding
+    ClassClosure *classClosure = cl.as_clas();
+    Assign_List *assignList = (Assign_List *)(classClosure->clas->left());
+    Fun_List *funList = (Fun_List *)(right());
+    if (assignList->end() - assignList->begin() != funList->end() - funList->begin())
+    {
+        std::cerr << "Error: Incorrect number of arguments" << std::endl;
+        return EvalResult();
+    }
+
+    // Create a local scope and bind the arguments
+    Ref_Env *local = new Ref_Env(classClosure->env);
+    for (auto pitr = assignList->begin(), aitr = funList->begin(); pitr != assignList->end(); pitr++, aitr++)
+    {
+        Variable *var = (Variable *)(*pitr);
+        Parse_Tree *arg = *aitr;
+        local->declare(var->name());     // <-- Forces the parameter to be local
+        var->set(local, arg->eval(env)); // <-- Binds the argument
+    }
+
+    return classClosure->clas->right()->eval(local);
+}
+
+void Clas_Inst::print(int indent) const
+{
+    std::cout << std::setw(indent) << "";
+    std::cout << "class call " << std::endl;
+    left()->print(indent + 1);
+    right()->print(indent + 1);
+}
+
+Clas_Access::Clas_Access(const Lexer_Token &clas_name)
+        : clas_name(clas_name)
+{
+    // Constructor implementation if needed
+}
+
+EvalResult Clas_Access::eval(Ref_Env *env)
+{
+    // Retrieve the array name
+    std::string clasName = clas_name.lexeme;
+
+    // Check if the array variable exists in the environment
+    EvalResult *clasVar = env->lookup(clasName);
+    std::cout<<"clasVar"<<clasVar<<std::endl;
+    std::cout<<"clasVar type"<<clasVar->type()<<std::endl;
+
+//    EvalResult *arrayval = env->lookup(index_.lexeme);
+
+    /*if (!clasVar)
+    {
+
+    }
+
+    // Check if the arrayVar is an array
+    if (arrayVar->type() != EvalType::VECTOR)
+    {
+        std::cerr << "Error: " << arrayName << " is not an array." << std::endl;
+        return EvalResult(); // Return an undefined result
+    }
+
+    // // Retrieve the vector from EvalResult
+    std::vector<int> arrayValues = arrayVar->as_array();
+
+    // // Check if the index is within bounds
+    if (arr_index < 0 || arr_index >= arrayValues.size())
+    {
+        std::cerr << "Error: Index out of bounds for array " << arrayName << std::endl;
+        return EvalResult(); // Return an undefined result
+    }
+*/
+    // // Create a new EvalResult object and set its value
+    EvalResult result;
+//    result.set((arrayValues[arr_index]));
+
+    return result;
+}
+
+void Clas_Access::print(int indent) const
+{
+    // print the right child
+    right()->print(indent + 1);
+
+    // indent and print ourself
+    std::cout << std::setw(indent) << "";
+    std::cout << ". (Access)" << std::endl;
+
+    // print the left child
+    left()->print(indent + 1);
 }
 
 Array_Declaration::Array_Declaration(const Lexer_Token &type, int bound, const Lexer_Token &name)

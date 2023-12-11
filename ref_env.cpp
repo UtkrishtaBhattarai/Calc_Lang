@@ -5,7 +5,7 @@
 #include "parse_tree.h"
 #include "ref_env.h"
 
-Ref_Env::Ref_Env() : Ref_Env(nullptr)
+Ref_Env::Ref_Env()
 {
   // nothing to do here
 }

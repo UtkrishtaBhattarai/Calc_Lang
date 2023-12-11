@@ -39,6 +39,8 @@ enum Token {
   FUN,
   COMMA,
   CLASS,
+  INHERITS,
+  ATTRIBUTE,
   STRLIT,
   ARRAY,
   LBRACKET,
@@ -55,6 +57,8 @@ enum Token {
   EMPLOYEE,
   CUSTOMER,
   CUSTOMER_PURCHASE,
+  OBJECT,
+  OBJ,
 };
 
 // Tokens as emitted by the lexer
