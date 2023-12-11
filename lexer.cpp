@@ -223,6 +223,7 @@ bool Lexer::lex_kw_or_id() {
   tokens["customer_purchase"] = CUSTOMER_PURCHASE;
   tokens["write"] = WRITE;
   tokens["close"] = CLOSE;
+  tokens["inherits"] = INHERITS;
 
   // check to see if it starts properly
   if(_cur_char != '_' and not isalpha(_cur_char)){return false;}
