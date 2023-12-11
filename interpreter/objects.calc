@@ -1,0 +1,15 @@
+class Base
+  fun my_fun()
+    display "Inherited from Base."
+  end fun
+end class
+
+class Subclass inherits Base
+  fun sub_fun()
+    display "Subclass method."
+  end fun
+end class
+
+c = Subclass()
+c.sub_fun
+c.my_fun
