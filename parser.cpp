@@ -868,10 +868,30 @@ Parse_Tree *Parser::close_file()
   return new Close_File(file_name);
 }
 
+// < Class-Decl > ::= CLASS ID < Inheritance > NEWLINE < Program > END CLASS
 Parse_Tree *Parser::parse_Class_Decl()
 {
   must_be(CLASS);
   consume();
+
+  must_be(ID);
+
+  // Parse the class name (ID)
+  if (!has(ID))
+  {
+    std::cerr << "Parse Error: Expected an identifier (class name) after CLASS keyword\n";
+    exit(-1);
+  }
   Lexer_Token class_name = consume();
+
+
+
+
+  if (has(END))
+  {
+    consume();
+  }
+
   return new Class_Declaration(class_name);
+
 }
