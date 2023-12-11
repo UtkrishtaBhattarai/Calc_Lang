@@ -873,25 +873,29 @@ Parse_Tree *Parser::parse_Class_Decl()
 {
   must_be(CLASS);
   consume();
-
   must_be(ID);
+  Lexer_Token class_name_tok = consume();
 
-  // Parse the class name (ID)
-  if (!has(ID))
-  {
-    std::cerr << "Parse Error: Expected an identifier (class name) after CLASS keyword\n";
-    exit(-1);
-  }
-  Lexer_Token class_name = consume();
-
-
-
-
-  if (has(END))
+  // Parse inheritance
+  if (has(INHERITS))
   {
     consume();
+    must_be(ID);
+    Lexer_Token superclass = consume();
+    // TODO: Parse inheritance
+    // std::cout << "Inherits from " << superclass.lexeme << std::endl;
   }
 
-  return new Class_Declaration(class_name);
+  must_be(NEWLINE);
+  consume();
 
+  // Parse class body;
+  Parse_Tree *program = parse_Program();
+  must_be(END);
+  consume();
+  must_be(CLASS);
+  consume();
+
+  Class_Declaration *result = new Class_Declaration(class_name_tok);
+  return (Parse_Tree *)result;
 }
