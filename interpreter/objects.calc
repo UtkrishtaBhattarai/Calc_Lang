@@ -5,10 +5,17 @@ class Base
 end class
 
 class Subclass inherits Base
+  fun my_fun()
+    display "Overridden in subclass."
+  end fun
+
   fun sub_fun()
     display "Subclass method."
   end fun
 end class
+
+b = Base()
+b.my_fun
 
 c = Subclass()
 c.sub_fun
