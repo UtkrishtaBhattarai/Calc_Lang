@@ -4,3 +4,38 @@ ARRAYS
 # get arrays values by "array_name.get index
 # get array size by "array_name.size"
 # display whole array contents by just "display array_name"
+
+
+STRINGS
+# string can be passed by enclosing them inside " ".
+# if not passed through enclosing " ", the string won't be valid.
+# for example: name = "string" and from console too if it asks for string, you pass it like input = "string"
+
+INTLIT
+# intlit are any numbers with no decimal values. [0-9]
+
+REALLIT
+# reallit are values with decimal in them
+
+Question 1 : Reversing An Array
+# it will the values of numbers in an array and will reverse them and show them as a array return list
+
+Question 2 : Bubble Sort Using Nested Subroutines
+# it will take number of bound for that array, then take that number of an elements and then with use of bubble sort using nested subroutines, it will swap
+# the elements unless it is sorted and will display the sorted array.
+
+Question 3
+
+
+
+Question 4 : Company DB
+# this is an example of the program that we have been implementing on our personal assignment
+# the program will ask for file name, you pass it by enclosing them in " ", e.g. "acme"
+# then if the file was there already, it will load the contents, if not, it will create a new file with that name. 
+# it will display main menu with different options, 1 for employee, 2 for customers and 3 for exiting from system
+# if you enter 1 it will display the employees and then it will show whether you would like to add an employee or return to main menu
+# if you enter 1, it will ask for emp details which should be passed inside " " e.g. Name= "employee1" for string values. 
+# if you enter 2, it will return to main menu. 
+# Now on the main menu if you enter 2, it will take you to customer where you can add customer, add sales, view customer and their purchase and main menu. 
+# Now if you enter all the details, you are supposed to return to main menu and enter 3 in order for the program to exit and save the data into the file. 
+

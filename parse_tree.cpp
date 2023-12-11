@@ -1493,8 +1493,8 @@ EvalResult Write_File::eval(Ref_Env *env)
 
   std::string filename = var_val.as_string();
 
-  std::cout << "Writing data for " << var_val.as_string() << ":" << std::endl;
-  std::cout << "Write Type " << write_type << std::endl;
+  // std::cout << "Writing data for " << var_val.as_string() << ":" << std::endl;
+  // std::cout << "Write Type " << write_type << std::endl;
 
   int i = 0;
   if (write_type == "employee")
@@ -1536,10 +1536,10 @@ EvalResult Write_File::eval(Ref_Env *env)
       }
       else
       {
-          std::cout << "Debug: customer_number value: " << env->get(customer_number).as_integer() << std::endl;
+          // std::cout << "Debug: customer_number value: " << env->get(customer_number).as_integer() << std::endl;
 
           int cust_num = env->get(customer_number).as_integer();
-          std::cout << "Debug: cust_num before check: " << cust_num << std::endl;
+          // std::cout << "Debug: cust_num before check: " << cust_num << std::endl;
 
 
           if (cust_num <= 0 || cust_num > customers.size())
@@ -1563,7 +1563,7 @@ EvalResult Write_File::eval(Ref_Env *env)
       }
   }
 
-    std::cout << "Writing data for " << filename << ":" << std::endl;
+    // std::cout << "Writing data for " << filename << ":" << std::endl;
     std::string final_data = "";
     if (employees.size() > 0)
     {
