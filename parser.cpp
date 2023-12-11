@@ -116,9 +116,9 @@ Parse_Tree *Parser::parse_Statement_Body()
             must_be(NEWLINE);
             consume();
         }
-    }else if(has(OBJECT)){
+    }else if(has(OBJECT)){ //Object obj = new Test()
         consume();
-        must_be(ID); consume();
+        must_be(OBJ); consume();
         must_be(EQUAL); consume();
         must_be(NEW); consume();
         must_be(ID); consume();

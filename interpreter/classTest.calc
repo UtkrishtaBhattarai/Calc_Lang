@@ -24,7 +24,7 @@ class Test
 
 class end
 
-#Object obj = new Test()
+Object obj = new Test()
 calcext = "calcext"
 obj.setName(calcext)
 obj.setEmail("calcext@semo.edu")
