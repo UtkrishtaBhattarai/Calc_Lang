@@ -58,6 +58,8 @@ enum Token {
   WRITE,
   CLOSE,
   INHERITS,
+  OBJECT,
+  OBJ,
 };
 
 // Tokens as emitted by the lexer

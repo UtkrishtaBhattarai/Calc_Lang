@@ -135,6 +135,33 @@ Parse_Tree* Parser::parse_Statement() {
 Parse_Tree *Parser::parse_Statement_Body()
 {
   Parse_Tree *result;
+    if(has(CLASS)){
+        consume();
+        if(has(ID)){
+            consume();
+            must_be(NEWLINE);
+            consume();
+        }else{
+            must_be(END);
+            consume();
+            must_be(NEWLINE);
+            consume();
+        }
+    }else if(has(OBJECT)){ //Object obj = new Test()
+        consume();
+        must_be(OBJ); consume();
+        must_be(EQUAL); consume();
+        must_be(NEW); consume();
+        must_be(ID); consume();
+        must_be(LPAREN); consume();
+        must_be(RPAREN); consume();
+        must_be(NEWLINE); consume();
+    }
+  if(has(OBJ)){
+      consume();
+      must_be(DOT);
+      consume();
+  }
 
   if (has(CLASS))
   {
