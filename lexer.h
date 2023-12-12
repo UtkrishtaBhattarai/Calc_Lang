@@ -60,6 +60,8 @@ enum Token {
   INHERITS,
   OBJECT,
   OBJ,
+  PRIVATE,
+  PUBLIC,
 };
 
 // Tokens as emitted by the lexer

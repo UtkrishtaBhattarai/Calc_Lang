@@ -1,8 +1,10 @@
 class Test
+private
     name = ""
     email = ""
     phone = ""
 
+public
     fun setName(_name)
         name = _name
     end fun
